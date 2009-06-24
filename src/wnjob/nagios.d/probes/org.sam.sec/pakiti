@@ -1,0 +1,39 @@
+#!/bin/bash
+
+VERSION="2.0.3"
+
+# Getting parameters from the configuration file
+SERVER="https://pakiti.cern.ch/feed/"
+CURL_BIN="/usr/bin/curl -ks"
+CA_PATH="/etc/grid-security/certificates/"
+TAG="Nagios Pakiti probe"
+
+# Getting system parameters
+HOSTNAME=`hostname -f`
+RPMS=`rpm -qa --queryformat "%{installtime} NEWPAKITIRPM=%{NAME} %{EPOCH}:%{VERSION}-%{RELEASE}\n" |sort -nr | sed -e 's/^[^ ]* //' |sed -e 's/(none)/0/g' |xargs`
+KERNEL=`uname -r`
+CURL=""
+
+# Preparing curl string
+if [ "X${CA_PATH}" != "X" ]; 
+	then 
+	CURL="${CURL} --capath ${CA_PATH}";
+fi
+
+CURL="${CURL} -F host=\"${HOSTNAME}\"";
+CURL="${CURL} -F tag=\"${TAG}\"";
+CURL="${CURL} -F kernel=\"${KERNEL}\"";
+CURL="${CURL} -F version=\"${VERSION}\"";
+CURL="${CURL} -F rpms=\"${RPMS}'\" ";
+
+COMMAND="${CURL_BIN}${CURL}${SERVER}"
+RESULT=`eval "${COMMAND}"`
+exit_code=$?
+
+if [ $exit_code == 0 ] ; then
+    echo "summary: Pakiti reported correctly."
+    exit $SAME_OK
+else
+    echo "summary: There was an error on pakiti reporting."
+    exit $SAME_ERROR
+fi
