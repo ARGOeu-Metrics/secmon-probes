@@ -39,6 +39,7 @@ install --directory %{buildroot}%{dir}
 %files
 %defattr(-,root,root,-)
 %{dir}/wnjob
+%{dir}
 
 %changelog
 * Mon Jul 6 2009 C. Triantafyllidis <ctria@grid.auth.gr> - 0.1.0-1
