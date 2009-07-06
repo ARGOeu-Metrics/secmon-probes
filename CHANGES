@@ -1,0 +1,5 @@
+* Mon Jul 6 2009 C. Triantafyllidis <ctria@grid.auth.gr> - 0.1.0-1
+- Initial build
+- Based on CE-probe WN tarball assembly
+- Contains probes:
+  * WN-Pakiti
