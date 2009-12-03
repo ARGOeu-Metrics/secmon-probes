@@ -4,6 +4,8 @@ SPECFILE=grid-monitoring-probes-${SITE}.spec
 PROBES=src/wnjob
 FILES=CHANGES
 
+NOOP    = true
+
 rpmtopdir := $(shell rpm --eval %_topdir)
 rpmbuild  := $(shell [ -x /usr/bin/rpmbuild ] && echo rpmbuild || echo rpm)
 
@@ -45,3 +47,6 @@ rpm: rpmel4 rpmel5
 
 clean:
 	rm -rf dist
+
+sources: dist $(SPECFILE)
+	cd dist && tar cvfz ../$(PKGNAME)-$(PKGVERS).tgz $(PKGNAME)-$(PKGVERS)/*
