@@ -3,7 +3,7 @@
 VERSION="2.0.3"
 
 # Getting parameters from the configuration file
-SERVERS="https://pakiti.afroditi.hellasgrid.gr/feed/ https://pakiti.cern.ch/feed/"
+SERVERS="https://pakiti.cern.ch/feed/"
 CURL_BIN="/usr/bin/curl -ks"
 CA_PATH="/etc/grid-security/certificates/"
 TAG="Nagios Pakiti probe"
@@ -36,13 +36,16 @@ done
 
 if [ $server_ok_count == $server_count ]; then
   echo "OK: Pakiti reported correctly to $server_count servers."
-  exit $SAME_OK
+  echo "Pakiti reported correctly to all the configured servers."
+  exit 0
 else
   if [ $server_ok_count != 0 ]; then
-    echo "WARNING: Pakiti reported on $server_ok_count out of $server_count servers."
-    exit $SAME_WARNING
+    echo "WARNING: Pakiti didn't report to all configured servers."
+    echo "Pakiti reported on $server_ok_count out of $server_count servers."
+    exit 1
   else
     echo "ERROR: There was an error on pakiti reporting."
-    exit $SAME_ERROR
+    echo "Pakiti failed to report to any server."
+    exit 2
   fi
 fi

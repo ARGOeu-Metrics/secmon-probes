@@ -1,3 +1,8 @@
+* Wed Jan 20 2010 C. Triantafyllidis <ctria@grid.auth.gr> - 0.1.1-1
+- Added the check_and_encrypt command
+- Added a detail line to pakiti probe (no useful data yet here, just for testing)
+- pakiti probe results are sent encrypted back to the server
+
 * Mon Jul 6 2009 C. Triantafyllidis <ctria@grid.auth.gr> - 0.1.0-1
 - Initial build
 - Based on CE-probe WN tarball assembly
