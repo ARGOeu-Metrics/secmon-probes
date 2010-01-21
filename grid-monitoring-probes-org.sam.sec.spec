@@ -5,7 +5,7 @@
 
 Summary: WLCG Compliant Probes from %{site}
 Name: grid-monitoring-probes-org.sam.sec
-Version: 0.1.0
+Version: 0.1.2
 Release: 1%{?dist}
 
 License: GPL
