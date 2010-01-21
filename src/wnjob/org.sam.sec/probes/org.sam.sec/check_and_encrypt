@@ -2,6 +2,7 @@
 
 output=`$@`
 status=$?
+echo OK
 echo -e "$status\n$output" |openssl rsautl -encrypt -inkey hostcert.pem -certin| openssl enc -e -base64
 
 exit 0
