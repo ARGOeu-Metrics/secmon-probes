@@ -44,6 +44,9 @@ install --directory %{buildroot}%{dir}
 %{dir}
 
 %changelog
+* Mon Jan 25 2010 C. Triantafyllidis <ctria@grid.auth.gr> - 0.1.2-2
+- Added the missing jdl template
+
 * Thu Jan 21 2010 C. Triantafyllidis <ctria@grid.auth.gr> - 0.1.2-1
 - Added a fake "OK" to the returned result of check_and_encrypt command
 
