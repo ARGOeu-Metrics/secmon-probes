@@ -1,3 +1,6 @@
+* Mon Jan 25 2010 C. Triantafyllidis <ctria@grid.auth.gr> - 0.1.2-3
+- Fixed the _encrypted definition
+
 * Mon Jan 25 2010 C. Triantafyllidis <ctria@grid.auth.gr> - 0.1.2-2
 - Added the missing jdl template
 
