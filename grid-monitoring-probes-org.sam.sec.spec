@@ -5,8 +5,8 @@
 
 Summary: WLCG Compliant Probes from %{site}
 Name: grid-monitoring-probes-org.sam.sec
-Version: 0.1.2
-Release: 3%{?dist}
+Version: 0.1.3
+Release: 1%{?dist}
 
 License: GPL
 Group: Network/Monitoring
@@ -44,6 +44,9 @@ install --directory %{buildroot}%{dir}
 %{dir}
 
 %changelog
+* Tue Apr 20 2010 Christos Triantafyllidis <ctria@grid.auth.gr>  - 0.1.3-1
+- Added ARCH reporting for pakiti
+
 * Mon Jan 25 2010 C. Triantafyllidis <ctria@grid.auth.gr> - 0.1.2-3
 - Fixed the _encrypted definition
 

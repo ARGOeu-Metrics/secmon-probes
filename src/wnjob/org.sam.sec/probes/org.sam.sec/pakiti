@@ -12,12 +12,14 @@ TAG="Nagios Pakiti probe"
 HOSTNAME=`hostname -f`
 RPMS=`rpm -qa --queryformat "%{installtime} NEWPAKITIRPM=%{NAME} %{EPOCH}:%{VERSION}-%{RELEASE}\n" |sort -nr | sed -e 's/^[^ ]* //' |sed -e 's/(none)/0/g' |xargs`
 KERNEL=`uname -r`
+ARCH=`uname -m`
 CURL=""
 
 CURL="${CURL} --capath ${CA_PATH}";
 CURL="${CURL} -F host=\"${HOSTNAME}\"";
 CURL="${CURL} -F tag=\"${TAG}\"";
 CURL="${CURL} -F kernel=\"${KERNEL}\"";
+CURL="${CURL} -F arch=\"${ARCH}\"";
 CURL="${CURL} -F version=\"${VERSION}\"";
 CURL="${CURL} -F rpms=\"${RPMS}'\" ";
 
