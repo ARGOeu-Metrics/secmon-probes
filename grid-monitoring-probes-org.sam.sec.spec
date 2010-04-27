@@ -5,7 +5,7 @@
 
 Summary: WLCG Compliant Probes from %{site}
 Name: grid-monitoring-probes-org.sam.sec
-Version: 0.1.3
+Version: 0.1.4
 Release: 1%{?dist}
 
 License: GPL
@@ -21,8 +21,10 @@ BuildRequires: python >= 2.3
 Includes a check_and_encrypt to command in order to encrypt the results of security probes.
 
 Contains the following Nagios probes: 
-WN-pakiti
-- Pakiti results from the tested WN are sent to configured pakiti server(s). Message Broker gets as result whether the client reported correctly to the server(s). (The results of this probe are encrypted)
+* WN-pakiti
+- Pakiti results from the tested WN are sent to configured pakiti server(s). The probe reports to Nagios whether the reporting to Pakiti server(s) was successful.
+* WN-CRL
+- Tests the CRLs validity on WN
 
 %prep
 %setup -q
@@ -44,7 +46,11 @@ install --directory %{buildroot}%{dir}
 %{dir}
 
 %changelog
-* Tue Apr 20 2010 Christos Triantafyllidis <ctria@grid.auth.gr>  - 0.1.3-1
+* Tue Apr 27 2010 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.1.4-1
+- Changed the encryption method
+- Added org.sam.sec.WN-CRL probe
+
+* Tue Apr 20 2010 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.1.3-1
 - Added ARCH reporting for pakiti
 
 * Mon Jan 25 2010 C. Triantafyllidis <ctria@grid.auth.gr> - 0.1.2-3
