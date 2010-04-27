@@ -1,0 +1,167 @@
+#!/bin/bash
+
+CRT_FILES="*.0"
+EXCEPTION[1]="$CERTDIR/e1fce4e9.0"
+EXCEPTION[2]="/DC=gov/DC=fnal/O=Fermilab/OU=Certificate Authorities/CN=Kerberized CA"
+EXCEPTION[3]="$CERTDIR/c4435d12.0"
+EXCEPTION[4]="/CN=SWITCH CA/Email=switch.ca@switch.ch/O=Switch - Teleinformatikdienste fuer Lehre und Forschung/C=CH"
+EXCEPTION[5]="$CERTDIR/304cf809.0"
+EXCEPTION[6]="/C=CH/O=Switch - Teleinformatikdienste fuer Lehre und Forschung/CN=SWITCHslcs CA"
+OPENSSL=`which openssl`
+AWK=`which awk`
+# CRLs Timing, in minutes (WARN) and in days (ALER):
+WARN=540
+ALER=3
+
+NAGIOS_OK=0
+NAGIOS_WARNING=1
+NAGIOS_ERROR=2
+
+#
+# get date of lastUpdate from CRL file in standard format YYYYMMDDhh (dont use mmss, since
+# some systems cannot handle numbers larger than MAXINT in test(1) comparisons
+# This function comes from the fetch-crl script of eugridpma
+#
+LastUpdateOfCRL()
+{
+  crlhashfile="$1"
+
+  if [ ! -r "${crlhashfile}" ]; then
+    lastUpdate=0000000000
+    nextUpdate=0000000000
+    return
+  fi
+
+  u2date='
+  BEGIN {
+   im["Jan"]=1;im["Feb"]=2;im["Mar"]=3;im["Apr"]=4;im["May"]=5;im["Jun"]=6;
+   im["Jul"]=7;im["Aug"]=8;im["Sep"]=9;im["Oct"]=10;im["Nov"]=11;im["Dec"]=12;
+  }
+  /.*Update=/ { 
+    m=substr($1,index($1,"=")+1); 
+    h=substr($3,0,2); mi=substr($3,4,2); s=substr($3,7,2); 
+    printf "%04d%02d%02d%02d\n",$4,im[m],$2,h;
+  }
+  '
+
+  lastUpdateText=`${OPENSSL} crl -noout -in "${crlhashfile}" -lastupdate`
+  lastUpdate=`echo $lastUpdateText | ${AWK} "$u2date"`
+  nextUpdateText=`${OPENSSL} crl -noout -in "${crlhashfile}" -nextupdate`
+  nextUpdate=`echo $nextUpdateText | ${AWK} "$u2date"`
+}
+
+# Be default return OK
+crl_check=$NAGIOS_OK
+OUTPUT=""
+
+# SSL is mandatory for security tests
+if [ "x$OPENSSL" == "x" ]; then
+	OUTPUT="The openssl executable wasn't found. The output of 'which openssl' was empty!\n"
+	crl_check=$NAGIOS_WARNING
+fi
+
+##########################
+# COMPONENT SPECIFIC PART
+##########################
+
+if [ "x$X509_CERT_DIR" != "x" ]; then
+    OUTPUT=${OUTPUT}"X509_CERT_DIR is defined to $X509_CERT_DIR\n"
+    if [ -d $X509_CERT_DIR ]; then
+        CERTDIR=$X509_CERT_DIR
+    else
+        OUTPUT=${OUTPUT}"X509_CERT_DIR seems not to exist: using default directory.\n"
+        CERTDIR=/etc/grid-security/certificates
+		crl_check=$NAGIOS_WARNING
+    fi
+else
+    CERTDIR=/etc/grid-security/certificates
+fi
+
+OUTPUT=${OUTPUT}"Using certificates dir : $CERTDIR\n"
+
+#set +x
+CRT=`ls -1 $CERTDIR/$CRT_FILES 2>/dev/null`
+
+if [ "x$CRT" == "x" ]; then
+	echo "Cannot find certificate files"
+	crl_check=$NAGIOS_ERROR
+else
+	for I_CRT in $CRT ; do
+		if [ "x$OPENSSL" == "x" ]; then
+			SUB=$I_CRT
+		else
+			SUB=`$OPENSSL x509 -in $I_CRT -noout -subject| sed "s/subject= //"`
+			SUBF=$SUB" ("`ls $I_CRT |sed -e "s/.*\///g"`")"
+
+			# Checking CRT is not expired. If it is, then skip it.
+			if [ `$OPENSSL verify -CApath $CERTDIR $I_CRT |grep "error 10"|wc -l` != "0" ]; then
+				EXCEPTION[${#EXCEPTION[@]}+1]=$SUB
+			fi
+		fi
+
+		I_CRL=`ls $I_CRT | sed -e "s/\.0/\.r0/g"`
+
+		if [ ! -f $I_CRL ]; then
+			index=0
+
+			# Checking EXCEPTIONS
+			SKIP=
+			while [ "$index" -le "${#EXCEPTION[@]}" ]; do
+				j=${EXCEPTION[$index]}
+				let "index = $index + 1"
+				if [ "$j" == "$SUB" ]; then
+					SKIP=1
+				fi
+			done
+
+			if [ "$SKIP" == "1" ]; then
+				OUTPUT=${OUTPUT}"SUBF has been skipped by policy\n"
+			else
+				OUTPUT=${OUTPUT}"$SUBF has no CRL\n"
+				crl_check=$NAGIOS_ERROR
+			fi
+		else
+			if [ "x$OPENSSL" != "x" ]; then
+				LastUpdateOfCRL "$I_CRL"
+				today=`date -u '+%Y%m%d%H'`
+				d=$((nextUpdate-today))
+				if [ $d -le 0 ]; then
+					OUTPUT=${OUTPUT}"$SUBF CRL expired $d hours ago\n"
+					crl_check=$NAGIOS_ERROR
+				elif [ $d -le $((WARN/60)) ]; then
+					OUTPUT=${OUTPUT}"$SUBF CRL is expiring in less than $((WARN/60)) hours ($nextUpdate)\n"
+					crl_check=$NAGIOS_WARNING;
+				fi
+			
+			elif [ `find $I_CRL -mtime +$ALER|wc -l` == "1" ]; then
+				OLD=`ls $I_CRL -l |awk {'print "last updated at "$8" on "$7" " $6'}`
+				OUTPUT=${OUTPUT}"$SUBF CRL is more than $ALER days old ($OLD)\n"
+				crl_check=$NAGIOS_ERROR
+
+			elif [ `find $I_CRL -mmin +$WARN|wc -l` == "1" ]; then
+				OLD=`ls $I_CRL -l |awk {'print "last updated at "$8" on "$7" " $6'}`
+				OUTPUT=${OUTPUT}"$SUBF CRL is more than $WARN minutes old ($OLD)\n"
+				if [ "$crl_check" != "$NAGIOS_ERROR" ]; then 
+					crl_check=$NAGIOS_WARNING
+				fi
+			fi
+		fi
+	done
+fi
+
+############################
+# Printing global result
+############################
+if [ "$crl_check" == "$NAGIOS_OK" ]; then
+	echo "OK: All CRLs were checked and seem to be valid."
+elif [ "$crl_check" == "$NAGIOS_WARNING" ]; then
+	echo "WARNING: Some warnings found. Please check details."
+else
+	echo "ERROR: Some errors found. Please check details."
+fi
+
+echo -en "${OUTPUT}"
+
+exit $crl_check
+#****
+
