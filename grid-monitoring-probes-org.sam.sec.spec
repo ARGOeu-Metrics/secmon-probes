@@ -5,7 +5,7 @@
 
 Summary: WLCG Compliant Probes from %{site}
 Name: grid-monitoring-probes-org.sam.sec
-Version: 0.1.4
+Version: 0.1.5
 Release: 1%{?dist}
 
 License: GPL
@@ -24,7 +24,11 @@ Contains the following Nagios probes:
 * WN-pakiti
 - Pakiti results from the tested WN are sent to configured pakiti server(s). The probe reports to Nagios whether the reporting to Pakiti server(s) was successful.
 * WN-CRL
-- Tests the CRLs validity on WN
+- Tests the CRLs validity on WN.
+* WN-Permissions
+- Checks the permissions of folders exported in environment variables for world writable files/folders.
+* WN-FilePermVulns
+- Checks the permissions of files/folders related to known vulnerabilities.
 
 %prep
 %setup -q
@@ -46,6 +50,10 @@ install --directory %{buildroot}%{dir}
 %{dir}
 
 %changelog
+* Tue Apr 27 2010 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.1.5-1
+- Fixes SAM-564
+- detailed changelog in CHANGES
+
 * Tue Apr 27 2010 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.1.4-1
 - Changed the encryption method
 - Added org.sam.sec.WN-CRL probe

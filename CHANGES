@@ -1,3 +1,11 @@
+* Tue Apr 27 2010 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.1.5-1
+- Added 2 new probes:
+WN-Permissions:
+Checks the permissions of folders exported in environment variables for world writable files/folders.
+WN-FilePermVulns:
+Checks the permissions of files/folders related to known vulnerabilities.
+- Fixes SAM-564
+
 * Tue Apr 27 2010 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.1.4-1
 - Changed the encryption method
 - Added org.sam.sec.WN-CRL probe

@@ -1,0 +1,147 @@
+#!/bin/bash
+
+NAGIOS_OK=0
+NAGIOS_WARNING=1
+NAGIOS_ERROR=2
+
+function check_vuln() {
+   file_to_check=`echo $1 | cut -d: -f1`
+   cve=`echo $1 | cut -d: -f4`
+   num_vulns=`echo ${#checked_vulns[*]}`
+   checked_vulns[$num_vulns]=$cve":"$file_to_check
+  
+   if [ -e "$file_to_check" ]; then
+      warn_over=`echo $1 | cut -d: -f2`
+      error_over=`echo $1 | cut -d: -f3`
+      file_stat=`stat $file_to_check -c %a`
+      warn_over_rev=`echo $warn_over|rev`
+      error_over_rev=`echo $error_over|rev`
+      file_stat_rev=`echo $file_stat|rev`
+
+      # file_stat may not have all the bits
+      file_stat_rev=$file_stat_rev"000"
+
+      # Checking other's bit
+      if [ `echo $file_stat_rev |cut -b1` -gt `echo $warn_over_rev|cut -b1` ]; then
+         if [ `echo $file_stat_rev |cut -b1` -gt `echo $error_over_rev|cut -b1` ]; then
+            total_errors=$(($total_errors + 1));
+            output=${output}"##### ERROR: $file_to_check has permissions $file_stat instead of $warn_over ($cve)\n"
+            return
+         else
+            total_warnings=$(($total_warnings + 1));
+            output=${output}"##### WARNING: $file_to_check has permissions $file_stat instead of $warn_over ($cve)\n"
+            return
+         fi
+      fi
+      # Checking group's bit
+      if [ `echo $file_stat_rev |cut -b2` -gt `echo $warn_over_rev|cut -b2` ]; then
+         if [ `echo $file_stat_rev |cut -b2` -gt `echo $error_over_rev|cut -b2` ]; then
+            total_errors=$(($total_errors + 1));
+            output=${output}"##### ERROR: $file_to_check has permissions $file_stat instead of $warn_over ($cve)\n"
+            return
+         else
+            total_warnings=$(($total_warnings + 1));
+            output=${output}"##### WARNING: $file_to_check has permissions $file_stat instead of $warn_over ($cve)\n"
+            return
+         fi
+      fi
+      # Checking owner's bit
+      if [ `echo $file_stat_rev |cut -b3` -gt `echo $warn_over_rev|cut -b3` ]; then
+         if [ `echo $file_stat_rev |cut -b3` -gt `echo $error_over_rev|cut -b3` ]; then
+            total_errors=$(($total_errors + 1));
+            output=${output}"##### ERROR: $file_to_check has permissions $file_stat instead of $warn_over ($cve)\n"
+            return
+         else
+            total_warnings=$(($total_warnings + 1));
+            output=${output}"##### WARNING: $file_to_check</font>' has permissions $file_stat instead of $warn_over ($cve)\n"
+            return
+         fi
+      fi
+      # Checking suid's bit
+      if [ `echo $file_stat_rev |cut -b4` -gt `echo $warn_over_rev|cut -b4` ]; then
+         if [ `echo $file_stat_rev |cut -b4` -gt `echo $error_over_rev|cut -b4` ]; then
+            total_errors=$(($total_errors + 1));
+            output=${output}"##### ERROR: $file_to_check has permissions $file_stat instead of $warn_over ($cve)\n"
+            return
+         else
+            total_warnings=$(($total_warnings + 1));
+            output=${output}"##### WARNING: $file_to_check has permissions $file_stat instead of $warn_over ($cve)\n"
+            return
+         fi
+      fi
+   fi
+}
+
+
+function echo_array () {
+   # List values in array passed as argument
+   passed_array=( `echo "$1"` )
+   num_dirs=`echo ${#passed_array[*]}`
+   index=0
+
+   while [ "$index" -lt "$num_dirs" ]
+   do    # List all the elements in the array.
+      output=${output}"${passed_array[$index]}\n"
+      let "index = $index + 1"
+   done
+}
+
+function print_summary_metric_results () {
+
+   if [ $total_errors -gt 0 ]; then
+      echo "ERROR: Found files with known vulnerable permissions"
+   else
+      if [ $total_warnings -gt 0 ]; then
+         echo "WARNING: Found files with wrong permissions but not directly vulnerable"
+      else
+         echo "OK: Permissions of files with known vulnerabilities are fine"
+      fi
+   fi
+
+   echo -e $output
+
+}
+
+start_time=`date -u +%s`
+total_errors=0
+total_warnings=0
+declare -a checked_vulns  # Array containing all checked vulnerabilities
+return_code=$NAGIOS_OK
+
+for i in `cat $0.db` 
+do 
+    check_vuln $i
+done
+
+output=${output}"*******************\n"
+output=${output}"Checked vulnerabilities:\n"
+output=${output}"*******************\n"
+argument=`echo ${checked_vulns[@]}`
+echo_array "$argument\n"
+
+output=${output}"***************************\n"
+output=${output}"Number of errors   found: ${total_errors}\n"
+output=${output}"Number of warnings found: ${total_warnings}\n"
+output=${output}"***************************\n"
+
+print_summary_metric_results
+
+end_time=`date -u +%s`
+seconds=$(($end_time - $start_time))
+echo "********************************"
+echo "*  Time to execute this test: ${seconds} seconds  *"
+echo "********************************"
+
+
+if [ $total_errors -gt 0 ]; then
+   return_code=$NAGIOS_ERROR
+   exit $return_code
+else
+   if [ $total_warnings -gt 0 ]; then
+      return_code=$NAGIOS_WARNING
+      exit $return_code
+   fi
+fi
+
+exit $return_code
+
