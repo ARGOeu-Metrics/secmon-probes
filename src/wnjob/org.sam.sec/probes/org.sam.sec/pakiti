@@ -1,21 +1,16 @@
 #!/bin/bash
+cur_path=`dirname $0`
+result=`${cur_path}/pakiti2-client -c ${cur_path}/pakiti2-client.conf 2>&1` # | sed ':a;N;$!ba;s/\n/\\n/g'#`
+exit_status=$?
 
-RESULT=`eval ./pakiti2-client -c pakiti2-client.conf`
-server_count=`echo $RESULT | awk -F"Requested report to " '{print $2}'|awk -F" server" '{print $1}'`
-server_ok_count=`echo $RESULT | awk -F"Reported correctly to " '{print $2}'|awk -F" server" '{print $1}'`
-
-if [ $server_ok_count == $server_count ]; then
-  echo "OK: Pakiti reported correctly to $server_count servers."
-  echo "Pakiti reported correctly to all the configured servers."
-  exit 0
+if [ ${exit_status} == 0 ]; then
+  echo "OK: Pakiti reported correctly to all the configured servers."
 else
-  if [ $server_ok_count != 0 ]; then
+  if [ ${exit_status} == 1 ]; then
     echo "WARNING: Pakiti didn't report to all configured servers."
-    echo "Pakiti reported on $server_ok_count out of $server_count servers."
-    exit 1
   else
     echo "ERROR: There was an error on pakiti reporting."
-    echo "Pakiti failed to report to any server."
-    exit 2
   fi
 fi
+echo ${result}|sed -e "s# ERROR(s)#\nERROR(s)#g"
+exit ${exit_status}
