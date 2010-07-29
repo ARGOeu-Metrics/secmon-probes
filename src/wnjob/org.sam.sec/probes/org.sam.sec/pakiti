@@ -1,40 +1,8 @@
 #!/bin/bash
 
-VERSION="2.0.3"
-
-# Getting parameters from the configuration file
-SERVERS="https://pakiti.egi.eu/feed/"
-CURL_BIN="/usr/bin/curl -ks"
-CA_PATH="/etc/grid-security/certificates/"
-TAG="Nagios Pakiti probe"
-
-# Getting system parameters
-HOSTNAME=`hostname -f`
-RPMS=`rpm -qa --queryformat "%{installtime} NEWPAKITIRPM=%{NAME} %{EPOCH}:%{VERSION}-%{RELEASE}\n" |sort -nr | sed -e 's/^[^ ]* //' |sed -e 's/(none)/0/g' |xargs`
-KERNEL=`uname -r`
-ARCH=`uname -m`
-CURL=""
-
-CURL="${CURL} --capath ${CA_PATH}";
-CURL="${CURL} -F host=\"${HOSTNAME}\"";
-CURL="${CURL} -F tag=\"${TAG}\"";
-CURL="${CURL} -F kernel=\"${KERNEL}\"";
-CURL="${CURL} -F arch=\"${ARCH}\"";
-CURL="${CURL} -F version=\"${VERSION}\"";
-CURL="${CURL} -F rpms=\"${RPMS}'\" ";
-
-
-server_count=0
-server_ok_count=0
-for i in $SERVERS; do
-  server_count=`expr $server_count + 1`
-  COMMAND="${CURL_BIN}${CURL}${i}"
-  RESULT=`eval "${COMMAND}"`
-  exit_code=$?
-  if [ $exit_code == 0 ] ; then
-    server_ok_count=`expr $server_ok_count + 1`
-  fi
-done
+RESULT=`eval ./pakiti2-client -c pakiti2-client.conf`
+server_count=`echo $RESULT | awk -F"Requested report to " '{print $2}'|awk -F" server" '{print $1}'`
+server_ok_count=`echo $RESULT | awk -F"Reported correctly to " '{print $2}'|awk -F" server" '{print $1}'`
 
 if [ $server_ok_count == $server_count ]; then
   echo "OK: Pakiti reported correctly to $server_count servers."
