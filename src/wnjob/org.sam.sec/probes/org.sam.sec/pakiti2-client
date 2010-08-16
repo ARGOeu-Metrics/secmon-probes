@@ -139,9 +139,9 @@ fi
 
 # If method is autodetect, then detect which transport is available
 if [ "X${METHOD}" = "Xautodetect" ]; then
-  if [ -x ${CURL_BIN} ]; then
+  if [ -x "${CURL_BIN}" ]; then
     METHOD="curl"
-  elif [ -x ${OPENSSL_BIN} ]; then
+  elif [ -x "${OPENSSL_BIN}" ]; then
     METHOD="openssl"
   else
     quit 2 "No transport method available, install openssl or curl"
@@ -208,7 +208,7 @@ if [ ${IS_PROXY} -eq 1 ]; then
 else
   # Getting system parameters
   REPHOST=`hostname -f`
-  KERNEL=`uname -r | sed -e 's/\+/%2b/g'`
+  KERNEL=`uname -r`
   ARCH=`uname -m`
   PKGS=""
   TYPE=""
@@ -221,12 +221,12 @@ else
 
   # Get list of packages by method which is available on the host
   if [ ! -z "`which rpm`"  -a  -x "`which rpm`"  ]; then
-     rpm -qa --queryformat "'%{NAME}' '%{EPOCH}:%{VERSION}' '%{RELEASE}' '%{ARCH}'\n" 2>/dev/null | sed -e 's/(none)/0/g' | sed -e 's/\+/%2b/g' > ${TMPFILE}
+     rpm -qa --queryformat "'%{NAME}' '%{EPOCH}:%{VERSION}' '%{RELEASE}' '%{ARCH}'\n" 2>/dev/null | sed -e 's/(none)/0/g' > ${TMPFILE}
      TYPE="rpm"
   fi
   if [ ! -s "${TMPFILE}" ]; then
      if [ ! -z "`which dpkg-query`"  -a  -x "`which dpkg-query`"  ]; then
-        dpkg-query -W --showformat="\${Status}\|'\${Package}' '\${Version}' '' '\${Architecture}'\n" 2>/dev/null | grep '^install ok installed' | sed -e 's/^install ok installed|//' | sed -e 's/\+/%2b/g' > ${TMPFILE}
+        dpkg-query -W --showformat="\${Status}\|'\${Package}' '\${Version}' '' '\${Architecture}'\n" 2>/dev/null | grep '^install ok installed' | sed -e 's/^install ok installed|//' > ${TMPFILE}
      fi
      if [ -s "${TMPFILE}" ]; then
   	TYPE="dpkg"
@@ -265,7 +265,16 @@ for SERVER in $SERVERS; do
 			then
 			OPENSSL="${OPENSSL} -cert \"${HOST_CERT}\"";
 		fi
-	
+
+		# Replace + with %2b
+		sed -i -e 's/\+/%2b/g' ${TMPFILE}
+
+		# Add an empty line to the end of the packages file
+                echo -e "\n" >> ${TMPFILE}
+
+		# Kernel can obtain + char, so replace it with %2b
+		KERNEL=`uname -r | sed -e 's/\+/%2b/g'`
+
 		# Format of the SERVER variable is hostname:port
 		OPENSSL="${OPENSSL} -connect ${SERVER}";
 		
