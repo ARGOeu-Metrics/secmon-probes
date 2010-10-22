@@ -5,7 +5,7 @@
 
 Summary: WLCG Compliant Probes from %{site}
 Name: grid-monitoring-probes-org.sam.sec
-Version: 0.1.7
+Version: 0.2.0
 Release: 1%{?dist}
 
 License: GPL
@@ -29,6 +29,8 @@ Contains the following Nagios probes:
 - Checks the permissions of folders exported in environment variables for world writable files/folders.
 * WN-FilePermVulns
 - Checks the permissions of files/folders related to known vulnerabilities.
+* WN-RDSModuleCheck
+- Checks if an RDS socket can be opened (blacklisted as a mitigation for CVE-2010-3904)
 
 %prep
 %setup -q
@@ -50,6 +52,9 @@ install --directory %{buildroot}%{dir}
 %{dir}
 
 %changelog
+* Fri Oct 22 2010 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.2.0-1
+- Fixed SAM-879
+
 * Mon Aug 16 2010 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.1.7-1
 - Fixed SAM-700
 

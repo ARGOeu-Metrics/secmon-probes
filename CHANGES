@@ -1,3 +1,6 @@
+* Fri Oct 22 2010 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.2.0-1
+- Added WN-RDSModuleCheck (SAM-879)
+
 * Mon Aug 16 2010 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.1.7-1
 - Synced pakiti2-client with SourceForge current version
 
