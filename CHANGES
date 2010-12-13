@@ -1,3 +1,6 @@
+* Mon Dec 13 2010 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.2.1-1
+- Added the missing definitions in services config
+
 * Fri Oct 22 2010 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.2.0-1
 - Added WN-RDSModuleCheck (SAM-879)
 
