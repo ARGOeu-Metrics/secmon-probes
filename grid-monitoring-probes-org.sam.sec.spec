@@ -5,7 +5,7 @@
 
 Summary: WLCG Compliant Probes from %{site}
 Name: grid-monitoring-probes-org.sam.sec
-Version: 0.2.1
+Version: 0.3.0
 Release: 1%{?dist}
 
 License: GPL
@@ -31,6 +31,8 @@ Contains the following Nagios probes:
 - Checks the permissions of files/folders related to known vulnerabilities.
 * WN-RDSModuleCheck
 - Checks if an RDS socket can be opened (blacklisted as a mitigation for CVE-2010-3904)
+* WN-Torque
+- Checks if torque server has vulnerable options
 
 %prep
 %setup -q
@@ -52,6 +54,9 @@ install --directory %{buildroot}%{dir}
 %{dir}
 
 %changelog
+* Tue Feb 1 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.3.0-1
+- Fixed SAM-1220
+
 * Mon Dec 13 2010 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.2.1-1
 - Bug fixes
 
