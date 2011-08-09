@@ -1,0 +1,471 @@
+#!/bin/bash
+
+# Default values
+CONF=''
+SERVERS="pakiti.egi.eu:443 poros.ics.muni.1cz:443"
+SERVER_URL="/feed/"
+METHOD="autodetect"
+OPENSSL_BIN=`which openssl`
+CURL_BIN=`which curl`
+TAG="Nagios"
+CA_PATH="/etc/grid-security/certificates"
+HOST_CERT=""
+REPORT=0
+SERVER_REPORT_STATS=1
+IS_PROXY=0
+INTERFACE=""
+TIMEOUT=300
+
+
+# Do not edit below this line!
+#-----------------------------
+CLIENT_VERSION="3.0.0"
+PROTOCOL_VERSION="4"
+
+usage="Pakiti Client $CLIENT_VERSION, EGI, CESNET
+
+Usage: `basename $0` [-v] [-h] [-d] [-r] [-y] [-x] [-c configuration file] [-s servers] [-u server url] [-m method] [-o path to openssl binary] [-l path to curl binary] [-t tag] [-a path to the CA certs] [-e path to the host cert+key] [-i interface]\n
+ -v: verbose output
+ -h: this help
+ -d: debug output
+ -r: report results to the stdout
+ -y: report server stats
+ -x: if this client works as a proxy
+ -c [path to the configuration file] (default: $CONF)
+ -s [list of servers separated by the space, e.g.: localhost:443 pakiti.server.com:443]
+ -u [server's url, e.g. /feed/] (default: $SERVER_URL
+ -m [autodetect|curl|openssl] (default: $METHOD)
+ -o [path to the openssl bin if it isn't in the PATH]
+ -l [path to the curl binary if it isn't in the PATH]
+ -t [name of the tag] (default: $TAG)
+ -a [path to the CA certificates directory] (default: $CA_PATH)
+ -e [path to the host key+cert]
+ -i [name of the interface used to send the data to the Pakiti server] 
+
+"
+
+VERBOSE=0
+DEBUG=0
+ERROR=0
+TMPFILE=`mktemp`
+TMPERR=`mktemp`
+TMPOUT=`mktemp`
+
+function quit {
+  EXIT=$1
+  # If there were any errors, print them out
+  if [ "X$2" != "X" ]; then
+    if [ $1 -eq 1 ]; then
+      echo "WARNING: $2" 1>&2
+    elif [ $1 -gt 1 ]; then
+      echo "ERROR: $2" 1>&2
+    fi
+  fi
+  if [ ${ERROR} -eq 1 -a ${VERBOSE} -eq 1 ]; then
+    echo -n "ERROR(s): " 1>&2
+    cat ${TMPERR} 1>&2
+    if [ ${EXIT} -eq 0 ]; then
+      EXIT=1
+    fi
+  fi
+  
+  if [ ${VERBOSE} -eq 1 -a -s ${TMPOUT} ]; then
+    echo -n "STDOUT: "
+    cat ${TMPOUT}
+  fi
+
+  rm -f ${TMPFILE}
+  rm -f ${TMPERR}
+  rm -f ${TMPOUT}
+  exit ${EXIT}
+}
+
+# Load CLI options
+while getopts "dvhrc:yxs:u:m:o:l:t:a:e:i:" options; do
+  case $options in
+    c ) CONF=$OPTARG;;
+    v ) VERBOSE=1;;
+    d ) DEBUG=1
+	VERBOSE=1;;
+    h ) echo -e "$usage"
+	quit 1;;
+    r ) A_REPORT=1;;
+    y ) A_SERVER_REPORT_STATS=1;;
+    x ) A_IS_PROXY=1;;
+    s ) A_SERVERS=$OPTARG;;
+    u ) A_SERVER_URL=$OPTARG;;
+    m ) A_METHOD=$OPTARG;;
+    o ) A_OPENSSL_BIN=$OPTARG;;
+    l ) A_CURL_BIN=$OPTARG;;
+    t ) A_TAG=$OPTARG;;
+    a ) A_CA_PATH=$OPT_ARG;;
+    e ) A_HOST_CERT=$OPTARG;;
+    i ) A_INTERFACE=$OPTARG;;
+    * ) echo -e "$usage"
+	quit 1;;
+  esac
+done
+
+if [ "X${CONF}" = "X" -o ! -f "${CONF}" ]; then
+    if [ ${VERBOSE} -eq 1 ]; then
+		  echo "Configuration file is missing at '${CONF}', using defaults!" 1>&2
+    fi
+else
+  # Getting parameters from the configuration file
+  L_SERVERS=`grep "^[[:blank:]]*servers_name[[:blank:]]*=" ${CONF} | grep -v \# | awk  -F "=" '{print $2}'`
+  L_SERVER_URL=`grep "^[[:blank:]]*server_url[[:blank:]]*=" ${CONF} | grep -v \# | awk  -F "=" '{print $2}' | tr -d " "`
+  L_OPENSSL_BIN=`grep "^[[:blank:]]*openssl_path[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}'`
+  L_CURL_BIN=`grep "^[[:blank:]]*curl_path[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}'`
+  L_CA_PATH=`grep "^[[:blank:]]*ca_certificate[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}' | tr -d " "`
+  L_HOST_CERT=`grep "^[[:blank:]]*host_cert[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}'`
+  L_TAG=`grep "^[[:blank:]]*tag[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}' | tr -d " "`
+  L_METHOD=`grep "^[[:blank:]]*connection_method[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}' | tr -d " "`
+  L_REPORT=`grep "^[[:blank:]]*report[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}' | tr -d " "`
+  L_SERVER_REPORT_STATS=`grep "[[:blank:]]*server_rep_stats[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}' | tr -d " "`
+  L_IS_PROXY=`grep "^[[:blank:]]*is_proxy[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}' | tr -d " "`
+  L_INTERFACE=`grep "^[[:blank:]]*interface[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}' | tr -d " "`
+fi
+
+# Override default options, CLI has precedence over configuration file
+  if [ ! -z "${L_SERVERS}" ]; then SERVERS=${L_SERVERS}; fi
+  if [ ! -z "${A_SERVERS}" ]; then SERVERS=${A_SERVERS}; fi
+
+  if [ ! -z "${L_SERVER_URL}" ]; then SERVER_URL=${L_SERVER_URL}; fi
+  if [ ! -z "${A_SERVER_URL}" ]; then SERVER_URL=${A_SERVER_URL}; fi
+
+  if [ ! -z "${L_OPENSSL_BIN}" ]; then OPENSSL_BIN=${L_OPENSSL_BIN}; fi
+  if [ ! -z "${A_OPENSSL_BIN}" ]; then OPENSSL_BIN=${A_OPENSSL_BIN}; fi
+
+  if [ ! -z "${L_CURL_BIN}" ]; then CURL_BIN=${L_CURL_BIN}; fi
+  if [ ! -z "${L_CURL_BIN}" ]; then CURL_BIN=${L_CURL_BIN}; fi
+
+  if [ ! -z "${L_CA_PATH}" ]; then CA_PATH=${L_CA_PATH}; fi
+  if [ ! -z "${A_CA_PATH}" ]; then CA_PATH=${A_CA_PATH}; fi
+
+  if [ ! -z "${L_HOST_CERT}" ];	then HOST_CERT=${L_HOST_CERT}; fi
+  if [ ! -z "${A_HOST_CERT}" ];	then HOST_CERT=${A_HOST_CERT}; fi
+  
+  if [ ! -z "${L_TAG}" ]; then TAG=${L_TAG}; fi
+  if [ ! -z "${A_TAG}" ]; then TAG=${A_TAG}; fi
+  
+  if [ ! -z "${L_METHOD}" ]; then METHOD=${L_METHOD}; fi
+  if [ ! -z "${A_METHOD}" ]; then METHOD=${A_METHOD}; fi
+  
+  if [ ! -z "${L_REPORT}" ]; then REPORT=${L_REPORT}; fi
+  if [ ! -z "${A_REPORT}" ]; then REPORT=${A_REPORT}; fi
+  
+  if [ ! -z "${L_SERVER_REPORT_STATS}" ]; then SERVER_REPORT_STATS=${L_SERVER_REPORT_STATS}; fi
+  if [ ! -z "${A_SERVER_REPORT_STATS}" ]; then SERVER_REPORT_STATS=${A_SERVER_REPORT_STATS}; fi
+  
+  if [ ! -z "${L_IS_PROXY}" ]; then IS_PROXY=${L_IS_PROXY}; fi
+  if [ ! -z "${A_IS_PROXY}" ]; then IS_PROXY=${A_IS_PROXY}; fi
+  
+  if [ ! -z "${L_INTERFACE}" ];	then INTERFACE=${L_INTERFACE}; fi
+  if [ ! -z "${A_INTERFACE}" ];	then INTERFACE=${A_INTERFACE}; fi
+
+# If method is autodetect, then detect which transport is available
+if [ "X${METHOD}" = "Xautodetect" ]; then
+  if [ -x "${CURL_BIN}" ]; then
+    METHOD="curl"
+  elif [ -x "${OPENSSL_BIN}" ]; then
+    METHOD="openssl"
+  else
+    quit 2 "No transport method available, install openssl or curl"
+  fi
+fi
+
+# If proxy mode is enabled, then method cannot be stdout
+if [ ${IS_PROXY} -eq 1 -a "X${METHOD}" = "Xstdout" ]; then
+  quit 2 "Proxy and stdout method cannot be used together"
+fi
+
+
+# If we are in proxy mode, read the data from stdin
+if [ ${IS_PROXY} -eq 1 ]; then
+  # Parse firs line which contains host,arch,os,...
+  LINEN=0
+  ARGSDONE=0
+  while read; do
+    let LINEN=${LINEN}+1
+
+    # OS, arch, tag, ... are on the first line
+    if [ ${LINEN} -eq 1 ]; then
+      ARGS=${REPLY}
+  
+      IFS=","
+      for i in ${ARGS}; do
+	VAR=`echo $i | sed -e 's/^\([a-zA-Z]*\)=.*$/\1/'`
+	VAL=`echo $i | sed -e 's/^[a-zA-Z]*="\(.*\)"$/\1/'`
+  
+	if [ "X${VAR}" = "Xversion" ]; then
+	  # Check if the client using the same version
+	  if [ "X${VAL}" != "X${PROTOCOL_VERSION}" ]; then
+	    quit 2 "Client is using version ${VAL}, but proxy is using ${PROTOCOL_VERSION}"
+	  fi
+	fi
+	if [ "X${VAR}" = "Xtype" ]; then
+	  TYPE=${VAL}
+	fi
+	if [ "X${VAR}" = "Xhost" ]; then
+	  REPHOST=${VAL}
+	fi
+	if [ "X${VAR}" = "Xtag" ]; then
+	  TAG=${VAL}
+	fi
+	if [ "X${VAR}" = "Xkernel" ]; then
+	  KERNEL=${VAL}
+	fi
+	if [ "X${VAR}" = "Xarch" ]; then
+	  ARCH=${VAL}
+	fi
+	if [ "X${VAR}" = "Xsite" ]; then
+	  SITE=${VAL}
+	fi
+	if [ "X${VAR}" = "Xos" ]; then
+	  OS=${VAL}
+	fi 
+      done
+      ARGSDONE=1
+    fi
+
+    # Second line is empty
+    # Get pkgs
+    if [ ${LINEN} -gt 1 -a ${ARGSDONE} -eq 1 ]; then
+      echo ${REPLY} >> ${TMPFILE}
+    fi
+  done
+else
+  # Getting system parameters
+  REPHOST=`hostname -f`
+  KERNEL=`uname -r`
+  ARCH=`uname -m`
+  PKGS=""
+  TYPE=""
+  SITE=""
+
+  # If site variable is set, then us it
+  if [ "X${SITE_NAME}" != "X" ]; then
+    SITE=${SITE_NAME}
+  fi
+
+  if [ ${VERBOSE} -eq 1 ]; then
+    echo -e -n "Preparing the list of installed packages ... "
+  fi
+
+  # Get list of packages by method which is available on the host
+  if [ ! -z "`which rpm`"  -a  -x "`which rpm`"  ]; then
+     rpm -qa --queryformat "'%{NAME}' '%{EPOCH}:%{VERSION}' '%{RELEASE}' '%{ARCH}'\n" 2>/dev/null | sed -e 's/(none)/0/g' > ${TMPFILE}
+     TYPE="rpm"
+  fi
+  if [ ! -s "${TMPFILE}" ]; then
+     if [ ! -z "`which dpkg-query`"  -a  -x "`which dpkg-query`"  ]; then
+        dpkg-query -W --showformat="\${Status}\|'\${Package}' '\${Version}' '' '\${Architecture}'\n" 2>/dev/null | grep '^install ok installed' | sed -e 's/^install ok installed|//' > ${TMPFILE}
+     fi
+     if [ -s "${TMPFILE}" ]; then
+  	TYPE="dpkg"
+     fi
+  fi
+
+  if [ ${VERBOSE} -eq 1 ]; then
+     echo -e "Done."
+  fi
+fi
+
+# Detect OS (especially for Debian-like systems, RH based has package i.e. redhat-release which represents OS version)
+OS="unknown"
+for i in /etc/debian_version; do
+	if [ -f $i ]; then
+		case "${i}" in
+			/etc/debian_version)
+			OS="Debian `cat ${i}`"
+		 	;;
+	 	esac
+ 	fi
+ 	if [ "${OS}" != "unknown" ]; then
+	 	break
+ 	fi
+done 
+
+SERVERS_REPORTED_CORRECTLY=0
+# Iterate over all servers
+for SERVER in $SERVERS; do 
+  if [ ${VERBOSE} -eq 1 ]; then
+     echo -e -n "Sending data to the servser '${SERVER}' using transport method '${method}' ... "
+  fi
+	if [ "X${METHOD}" = "Xopenssl" ]; then
+		# Preparing openssl s_client string
+		OPENSSL="${OPENSSL_BIN} s_client"
+		
+		if [ "X${CA_PATH}" != "X" ]; then 
+			OPENSSL="${OPENSSL} -CApath \"${CA_PATH}\""
+		fi
+		
+		if [ ${VERBOSE} -eq 1 ]; then
+      OPENSSL="${OPENSSL} -msg"
+		else
+			OPENSSL="${OPENSSL} -quiet"
+		fi
+		
+		if [ ${DEBUG} -eq 1 ]; then
+      OPENSSL="${OPENSSL} -debug"
+		else
+			OPENSSL="${OPENSSL} -quiet"
+		fi
+		if [ "X${HOST_CERT}" != "X" ]; then
+			OPENSSL="${OPENSSL} -cert \"${HOST_CERT}\""
+		fi
+
+		# Replace + with %2b
+		sed -i -e 's/\+/%2b/g' ${TMPFILE}
+
+		# Add an empty line to the end of the packages file
+                echo -e "\n" >> ${TMPFILE}
+
+		# Kernel can obtain + char, so replace it with %2b
+		KERNEL=`uname -r | sed -e 's/\+/%2b/g'`
+
+		# Format of the SERVER variable is hostname:port
+		OPENSSL="${OPENSSL} -connect ${SERVER}"
+		
+		POST_DATA="type=${TYPE}&host=${REPHOST}&os=${OS}&arch=${ARCH}&tag=${TAG}&kernel=${KERNEL}&version=${PROTOCOL_VERSION}&report=${REPORT}&proxy=${IS_PROXY}&site=${SITE}&pkgs="
+		POST_DATA_SIZE=`echo -n ${POST_DATA} | wc -m`
+		FILE_SIZE=`cat ${TMPFILE} | wc -c`
+		let POST_DATA_SIZE=${POST_DATA_SIZE}+${FILE_SIZE}-1
+	
+		POST_HTTP_HEADER="POST ${SERVER_URL} HTTP/1.0\nContent-Type: application/x-www-form-urlencoded\nContent-Length: ${POST_DATA_SIZE}\n\n"
+		 
+		POST_DATA="${POST_HTTP_HEADER}${POST_DATA}"
+		
+		COMMAND="echo -e \"${POST_DATA}\" | cat - ${TMPFILE} | ${OPENSSL}"
+	
+	elif [ "X${METHOD}" = "Xcurl" ]; then
+		CURL=""
+	
+		# Preparing curl string
+		if [ "X${CA_PATH}" != "X" ]; then
+      CURL="${CURL} --capath \"${CA_PATH}\""
+		fi
+		
+		# Set output interface
+    if [ "X${INTERFACE}" != "X" ]; then
+       CURL="${CURL} --interface ${INTERFACE}"
+    fi
+
+		if [ ${VERBOSE} -eq 1 ]; then
+       CURL="${CURL} -F verbose=\"1\""
+		else	
+			# Be silent, but print error messages
+			CURL="${CURL} --silent --show-error"	
+		fi
+		
+		if [ ${DEBUG} -eq 1 ]; then
+      CURL="${CURL} -F debug=\"1\""
+		fi
+
+		if [ "X${HOST_CERT}" != "X" ]; then
+			CURL="${CURL} --cert \"${HOST_CERT}\""
+		fi
+		
+		CURL="${CURL} -F type=\"${TYPE}\""
+		CURL="${CURL} -F host=\"${REPHOST}\""
+		CURL="${CURL} -F os=\"${OS}\"" 
+		CURL="${CURL} -F tag=\"${TAG}\""
+		CURL="${CURL} -F kernel=\"${KERNEL}\""
+		CURL="${CURL} -F arch=\"${ARCH}\""
+		CURL="${CURL} -F version=\"${PROTOCOL_VERSION}\""
+		CURL="${CURL} -F report=\"${REPORT}\""
+		CURL="${CURL} -F proxy=\"${IS_PROXY}\""
+		CURL="${CURL} -F site=\"${SITE}\""
+		CURL="${CURL} -F pkgs=\<${TMPFILE}"
+		COMMAND="${CURL_BIN}${CURL} https://${SERVER}${SERVER_URL}"
+	
+	elif [ "X${METHOD}" = "Xstdout" ]; then
+		echo -e "type=\"${TYPE}\",host=\"${REPHOST}\",os=\"${OS}\",tag=\"${TAG}\",kernel=\"${KERNEL}\",arch=\"${ARCH}\",site=\"${SITE}\",version=\"${PROTOCOL_VERSION}\",report=\"${REPORT}\"\n"
+
+		cat $TMPFILE | sed -e 's/%2b/\+/g'
+	fi
+	
+	# Run prepared command
+	 # Prepare timeout routines, based on script from http://www.pixelbeat.org/scripts/timeout
+	cleanup_watchit()
+        {
+           trap - ALRM               #reset handler to default
+           kill $! 2>/dev/null &&    #kill watchit 
+	   exit 0
+        }
+
+	cleanup_process()
+        {
+           trap - ALRM               #reset handler to default
+           kill -ALRM $WATCHPID 2>/dev/null #stop timer subshell if running
+           kill $! 2>/dev/null &&    #kill last job
+	   echo "Timeout ${TIMEOUT} s has exceeded for the server '${SERVER}' and method '${METHOD}', process killed" >&2
+	   exit 124
+        }
+
+	watchit()
+        {
+           trap 'cleanup_watchit' ALRM
+           sleep $1 & wait
+           kill -ALRM $$ 2>/dev/null
+        }
+
+    	watchit ${TIMEOUT} & WATCHPID=$!	
+	trap 'cleanup_process' ALRM INT
+	eval ${COMMAND} 1>${TMPOUT} 2>${TMPERR} & wait $! ; RET=$?
+ 	kill -ALRM $WATCHPID 2>/dev/null
+	wait $WATCHPID
+
+	if [ ${RET} -ne 0 ]; then
+		ERROR=1
+	 	echo "ERROR: Error occured during send the data to '${SERVER}'. Method '${METHOD}', return code: ${RET}"
+		continue
+	else 
+		if [ ${VERBOSE} -eq 1 ]; then
+        echo -e "Done."
+		fi
+	fi
+
+	# Normalize the TMPOUT
+	if [ -s "${TMPOUT}" ]; then
+	  if [ "X${METHOD}" = "Xopenssl" ]; then
+	    # Skip HTTP response header, it is separeted from the body by the new line
+	    RESULT=`cat ${TMPOUT} | grep -v $'[\x0d]'`
+	  else
+	    RESULT=`cat ${TMPOUT}`
+	  fi
+	fi
+
+	if [ "${RESULT}" != "OK" ]; then
+	  echo "ERROR: Pakiti server '$SERVER' returns error:"
+	  echo ${RESULT}
+	  # Continue with next server
+	  continue
+	fi
+
+	if [ $? -eq 0 ] ; then
+		SERVERS_REPORTED_CORRECTLY=`expr $SERVERS_REPORTED_CORRECTLY + 1`
+	else 
+		# Set ERROR if any occured
+		ERROR=1
+	fi
+
+	# Print out the results
+	if [ ${REPORT} -eq 1 ]; then
+	  echo ${RESULT}
+	fi
+done
+
+# Print server reporting statistics
+if [ ${SERVER_REPORT_STATS} -eq 1 ]; then
+	SERVERS_COUNT=`echo $SERVERS |wc -w`
+	if [ ${SERVERS_COUNT} -eq  ${SERVERS_REPORTED_CORRECTLY} ]; then
+	  echo "OK: Pakiti reported correctly to $SERVERS_REPORTED_CORRECTLY server(s)"
+	elif [ ${SERVERS_REPORTED_CORRECTLY} -gt 0 ]; then
+	  quit 1 "Pakiti reported correctly only to $SERVERS_REPORTED_CORRECTLY/${SERVERS_COUNT} servers(s)"
+	else
+	  quit 2 "Pakiti failed to report to any server"
+	fi
+fi
+
+quit 0

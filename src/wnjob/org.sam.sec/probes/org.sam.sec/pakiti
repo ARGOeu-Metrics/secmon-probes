@@ -1,6 +1,6 @@
 #!/bin/bash
 cur_path=`dirname $0`
-result=`${cur_path}/pakiti2-client -c ${cur_path}/pakiti2-client.conf 2>&1` # | sed ':a;N;$!ba;s/\n/\\n/g'#`
+result=`${cur_path}/pakiti-client 2>&1`
 exit_status=$?
 
 if [ ${exit_status} == 0 ]; then
@@ -12,5 +12,5 @@ else
     echo "ERROR: There was an error on pakiti reporting."
   fi
 fi
-echo ${result}|sed -e "s# ERROR(s)#\nERROR(s)#g"
+echo ${result}|sed -e "s# ERROR#\nERROR#g" -e "s# WARNING#\nWARNING#g"
 exit ${exit_status}
