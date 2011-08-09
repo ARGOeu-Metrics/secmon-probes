@@ -1,14 +1,8 @@
 #!/bin/bash
 
-CRT_FILES="*.0"
-EXCEPTION[1]="$CERTDIR/e1fce4e9.0"
-EXCEPTION[2]="/DC=gov/DC=fnal/O=Fermilab/OU=Certificate Authorities/CN=Kerberized CA"
-EXCEPTION[3]="$CERTDIR/c4435d12.0"
-EXCEPTION[4]="/CN=SWITCH CA/Email=switch.ca@switch.ch/O=Switch - Teleinformatikdienste fuer Lehre und Forschung/C=CH"
-EXCEPTION[5]="$CERTDIR/304cf809.0"
-EXCEPTION[6]="/C=CH/O=Switch - Teleinformatikdienste fuer Lehre und Forschung/CN=SWITCHslcs CA"
-OPENSSL=`which openssl`
-AWK=`which awk`
+CRT_FILES="*.crl_url"
+OPENSSL=`which openssl 2>/dev/null`
+AWK=`which awk 2>/dev/null`
 # CRLs Timing, in minutes (WARN) and in days (ALER):
 WARN=540
 ALER=3
@@ -16,6 +10,7 @@ ALER=3
 NAGIOS_OK=0
 NAGIOS_WARNING=1
 NAGIOS_ERROR=2
+NAGIOS_UNKNOWN=3
 
 #
 # get date of lastUpdate from CRL file in standard format YYYYMMDDhh (dont use mmss, since
@@ -56,8 +51,14 @@ OUTPUT=""
 
 # SSL is mandatory for security tests
 if [ "x$OPENSSL" == "x" ]; then
-	OUTPUT="The openssl executable wasn't found. The output of 'which openssl' was empty!\n"
-	crl_check=$NAGIOS_WARNING
+	echo -en "The openssl executable wasn't found. The output of 'which openssl' was empty!\n"
+	exit $NAGIOS_UNKNOWN
+fi
+
+# Probe cannot work without awk
+if [ "x$AWK" == "x" ]; then
+        echo -en "The awk executable wasn't found. The output of 'which awk' was empty!\n"
+        exit $NAGIOS_UNKNOWN
 fi
 
 ##########################
@@ -86,20 +87,37 @@ if [ "x$CRT" == "x" ]; then
 	echo "Cannot find certificate files"
 	crl_check=$NAGIOS_ERROR
 else
-	for I_CRT in $CRT ; do
-		if [ "x$OPENSSL" == "x" ]; then
-			SUB=$I_CRT
-		else
-			SUB=`$OPENSSL x509 -in $I_CRT -noout -subject| sed "s/subject= //"`
-			SUBF=$SUB" ("`ls $I_CRT |sed -e "s/.*\///g"`")"
-
-			# Checking CRT is not expired. If it is, then skip it.
-			if [ `$OPENSSL verify -CApath $CERTDIR $I_CRT |grep "error 10"|wc -l` != "0" ]; then
-				EXCEPTION[${#EXCEPTION[@]}+1]=$SUB
+	for I_CRT_INFO in $CRT ; do
+                
+		# try with the new version of files (>= 1.38)
+		I_CRT=`ls $I_CRT_INFO | sed -e "s/\.crl_url/\.pem/g"`
+                if [ ! -f $I_CRT ]; then
+			# fail to the old versions (< 1.38)
+			I_CRT=`ls $I_CRT_INFO | sed -e "s/\.crl_url/\.0/g"`
+			if [ ! -f $I_CRT ] ; then
+				OUTPUT=${OUTPUT}"Found .crl_url file without .info or certificate: $I_CRT_INFO\n"
+				# no need to continue, there is no CRT file
+				continue
 			fi
 		fi
 
-		I_CRL=`ls $I_CRT | sed -e "s/\.0/\.r0/g"`
+		SUB=`$OPENSSL x509 -in $I_CRT -noout -subject| sed "s/subject= //"`
+		SUBF=$SUB" ("`ls $I_CRT |sed -e "s/.*\///g"`")"
+
+		# Checking CRT is not expired. If it is, then skip it.
+		if [ `$OPENSSL verify -CApath $CERTDIR $I_CRT |grep "error 10"|wc -l` != "0" ]; then
+			EXCEPTION[${#EXCEPTION[@]}+1]=$SUB
+		fi
+		
+		# find CRL based on CRT hash, this works
+		# with old and new versions
+		CRT_HASH=`${OPENSSL} x509 -hash -noout -in $I_CRT 2>&1`
+		if [ $? -ne 0 ]; then
+			OUTPUT=${OUTPUT}"Failed calculating $SUBF hash: $CRT_HASH"
+			crl_check=$NAGIOS_WARNING
+			continue
+		fi
+		I_CRL="$CERTDIR/${CRT_HASH}.r0"
 
 		if [ ! -f $I_CRL ]; then
 			index=0
@@ -115,7 +133,7 @@ else
 			done
 
 			if [ "$SKIP" == "1" ]; then
-				OUTPUT=${OUTPUT}"SUBF has been skipped by policy\n"
+				OUTPUT=${OUTPUT}"$SUBF has been skipped by policy\n"
 			else
 				OUTPUT=${OUTPUT}"$SUBF has no CRL\n"
 				crl_check=$NAGIOS_ERROR
@@ -130,7 +148,7 @@ else
 					crl_check=$NAGIOS_ERROR
 				elif [ $d -le $((WARN/60)) ]; then
 					OUTPUT=${OUTPUT}"$SUBF CRL is expiring in less than $((WARN/60)) hours ($nextUpdate)\n"
-					crl_check=$NAGIOS_WARNING;
+					crl_check=$NAGIOS_WARNING
 				fi
 			
 			elif [ `find $I_CRL -mtime +$ALER|wc -l` == "1" ]; then

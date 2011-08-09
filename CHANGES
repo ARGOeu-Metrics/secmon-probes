@@ -1,3 +1,6 @@
+* Wed Feb 9 2011 Emir Imamagic <eimamagi@srce.hr> - 0.3.1-1
+- Probe not compatible with the new CA distribution (SAM-1257)
+
 * Tue Feb 1 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.3.0-1
 - Added WN-Torque check (SAM-1220)
 
