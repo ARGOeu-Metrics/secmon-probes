@@ -2,7 +2,7 @@
 
 # Default values
 CONF=''
-SERVERS="pakiti.egi.eu:443 poros.ics.muni.1cz:443"
+SERVERS="pakiti.egi.eu:443 poros.ics.muni.cz:443"
 SERVER_URL="/feed/"
 METHOD="autodetect"
 OPENSSL_BIN=`which openssl`

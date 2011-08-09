@@ -5,7 +5,7 @@
 
 Summary: WLCG Compliant Probes from %{site}
 Name: grid-monitoring-probes-org.sam.sec
-Version: 0.3.3
+Version: 0.3.4
 Release: 1%{?dist}
 
 License: GPL
@@ -54,6 +54,9 @@ install --directory %{buildroot}%{dir}
 %{dir}
 
 %changelog
+* Tue Aug 9 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.3.4-1
+- Re-fixed SAM-1760
+
 * Tue Aug 9 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.3.3-1
 - Fixed SAM-1727
 
