@@ -1,3 +1,7 @@
+* Tue Aug 9 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.3.5-1
+- Applied patch from Ulf Tigersted (ulf.tigerstedt@csc.fi) for CRL probe (SAM-1727)
+- Minor additional fixes/cleanups on the CRL probe
+
 * Tue Aug 9 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.3.4-1
 - Typo in the second pakiti server URL (SAM-1760)
 
