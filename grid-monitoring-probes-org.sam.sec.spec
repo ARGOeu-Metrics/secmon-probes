@@ -54,6 +54,9 @@ install --directory %{buildroot}%{dir}
 %{dir}
 
 %changelog
+* Tue Aug 9 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.3.3-1
+- Fixed SAM-1727
+
 * Tue Aug 9 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.3.2-1
 - Fixed SAM-1760
 
