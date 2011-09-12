@@ -1,4 +1,4 @@
-SITE=org.sam.sec
+SITE=eu.egi.sec
 
 SPECFILE=grid-monitoring-probes-${SITE}.spec
 PROBES=src/wnjob

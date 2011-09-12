@@ -1,11 +1,11 @@
-%define site org.sam.sec
+%define site eu.egi.sec
 %define dir %{_libexecdir}/grid-monitoring/probes/%{site}
 
 %define debug_package %{nil}
 
-Summary: WLCG Compliant Probes from %{site}
-Name: grid-monitoring-probes-org.sam.sec
-Version: 0.3.6
+Summary: Security monitoring probes based on EGI CSIRT requirements
+Name: grid-monitoring-probes-eu.egi.sec
+Version: 0.4.0-1
 Release: 1%{?dist}
 
 License: GPL
@@ -16,6 +16,7 @@ Requires: grid-monitoring-probes-org.sam > 0.1.4-5
 AutoReqProv: no
 BuildArch: noarch
 BuildRequires: python >= 2.3
+Obsoletes: grid-monitoring-probes-org.sam.sec
 
 %description
 Includes a check_and_encrypt to command in order to encrypt the results of security probes.
@@ -44,6 +45,8 @@ export DONT_STRIP=1
 %{__rm} -rf %{buildroot}
 install --directory %{buildroot}%{dir}
 %{__cp} -rpf .%dir/wnjob  %{buildroot}%{dir}
+%{__cp} -pf .%dir/probes/*  %{buildroot}%{dir}/wnjob/%{site}/probes/%{site}
+tar -zcvf 
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -54,6 +57,9 @@ install --directory %{buildroot}%{dir}
 %{dir}
 
 %changelog
+* Fri Sep 9 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.4.0-1
+- SAM-1801: Renamed package to grid-monitoring-probes-eu.egi.sec
+
 * Wed Aug 17 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.3.6-1
 - Fixed SAM-1796
 
