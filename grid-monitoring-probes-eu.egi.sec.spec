@@ -44,9 +44,16 @@ Contains the following Nagios probes:
 export DONT_STRIP=1
 %{__rm} -rf %{buildroot}
 install --directory %{buildroot}%{dir}
+
+# gLite configuration
 %{__cp} -rpf .%dir/wnjob  %{buildroot}%{dir}
 %{__cp} -pf .%dir/probes/*  %{buildroot}%{dir}/wnjob/%{site}/probes/%{site}
-tar -zcvf 
+
+# ARC configuration
+%{__cp} -rpf .%dir/ARC  %{buildroot}%{dir}
+cd .%dir/probes/
+tar -zcvf %{buildroot}%{dir}/ARC/jobsubmit/probes.tar.gz *
+cd -
 
 %clean
 %{__rm} -rf %{buildroot}

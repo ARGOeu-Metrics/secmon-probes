@@ -1,0 +1,155 @@
+#!/bin/bash
+
+if [ -r /etc/grid-monitoring/org.ndgf.conf ] ; then
+    . /etc/grid-monitoring/org.ndgf.conf
+fi
+
+if [ -z "$NAGIOS_PLUGIN_UTILS" ] ; then
+    if [ -r /usr/lib64/nagios/plugins/utils.sh ] ; then
+	NAGIOS_PLUGIN_UTILS=/usr/lib64/nagios/plugins/utils.sh
+    elif [ -r /usr/lib/nagios/plugins/utils.sh ] ; then
+	NAGIOS_PLUGIN_UTILS=/usr/lib/nagios/plugins/utils.sh
+    fi
+fi
+
+if [ -z "$NAGIOS_PLUGIN_UTILS" -o ! -r $NAGIOS_PLUGIN_UTILS ] ; then
+    echo Cannot find Nagios plugin utilities
+    exit 2
+fi
+
+. $NAGIOS_PLUGIN_UTILS
+
+if [ -z $NAGIOS_CMD ] ; then
+    NAGIOS_CMD=/var/spool/nagios/cmd/nagios.cmd
+fi
+
+timeout=20
+testname=jobsubmit
+payload=org.ndgf
+
+while test $# != 0 ; do
+    case "$1" in
+	-V|--version)
+	    print_revision ARCCE-$testname 0.1
+	    exit $STATE_OK
+	    ;;
+	-h|--help)
+	    echo Valid options: -V, -h, -t, -w, -c, -H, -v
+	    exit $STATE_OK
+	    ;;
+	-t|--timeout)
+	    shift
+	    timeout=$1
+	    ;;
+	-w|--warning)
+	    shift
+	    ;;
+	-c|--critical)
+	    shift
+	    ;;
+	-H|--hostname)
+	    shift
+	    hostname=$1
+	    ;;
+	-x|--proxy)
+	    shift
+	    export X509_USER_PROXY=$1
+	    ;;
+	--vo)
+	    shift
+	    VO=$1
+	    ;;
+	--payload)
+	    shift
+	    payload=$1
+	    ;;
+	-v|--verbose)
+	    shift
+	    ;;
+	*)
+	    echo Unknown option "$1"
+	    exit $STATE_UNKNOWN
+	    ;;
+    esac
+    shift
+done
+
+if [ -z "$hostname" ] ; then
+    echo "Missing hostname"
+    exit $STATE_UNKNOWN
+fi
+
+confdir=/usr/share/grid-monitoring/eu.egi.sec/ARC/$testname
+
+jobdir=/var/spool/grid-monitoring/$payload/$hostname/$testname
+mkdir -p $jobdir
+
+if [ -r $jobdir/jobid ] ; then
+    ngstat -l -i $jobdir/jobid -t $timeout > $jobdir/status 2>&1
+    jobstatus=`grep "^  Status:" $jobdir/status | sed -e "s/  Status:\s*//"`
+
+    case "$jobstatus" in
+	"")
+	    msg="Job state not available"
+	    res=$STATE_WARNING
+	    ;;
+	"DELETED")
+	    ngclean -i $jobdir/jobid -t $timeout > /dev/null 2>&1
+	    rm -f $jobdir/jobid
+	    msg="Job deleted"
+	    res=$STATE_WARNING
+	    ;;
+	"FAILED")
+	    rm -rf $jobdir/$testname
+	    ngget -i $jobdir/jobid -t $timeout -dir $jobdir -j > /dev/null 2>&1
+	    rm -f $jobdir/jobid
+	    msg="Job failed"
+	    res=$STATE_CRITICAL
+	    ;;
+	"FINISHED")
+	    rm -rf $jobdir/$testname
+	    ngget -i $jobdir/jobid -t $timeout -dir $jobdir -j > /dev/null 2>&1
+
+	    for test in `cat $confdir/test_list`; do
+		tres=`cat $jobdir/$testname/$test.res`
+		tmsg=`cat $jobdir/$testname/$test.msg`
+		time=`date +%s`
+		echo "[$time] PROCESS_SERVICE_CHECK_RESULT;$hostname;eu.egi.sec.arc.WN-$test-$VO;$tres;$tmsg" > $NAGIOS_CMD
+	    done
+
+	    rm -f $jobdir/jobid
+	    msg="Job finished successfully"
+	    res=$STATE_OK
+	    ;;
+	*)
+	    msg="Job not finsihed yet: $jobstatus"
+	    res=$STATE_OK
+	    ;;
+    esac
+
+    if [ -r $jobdir/jobid ] ; then
+	age=$(( `date +%s` - `stat -c %Y $jobdir/jobid` ))
+	if [ $age -gt 43200 ] ; then # 12 hours
+	    ngkill -i $jobdir/jobid -t $timeout > /dev/null 2>&1
+	    ngclean -i $jobdir/jobid -t $timeout > /dev/null 2>&1
+	    rm -f $jobdir/jobid
+	    msg="Job not completed within 12 hours"
+	    res=$STATE_WARNING
+	fi
+    fi
+fi
+
+if [ ! -r $jobdir/jobid ] ; then
+    cp -p $confdir/xrsl $jobdir/xrsl
+    ngsub -c $hostname -o $jobdir/jobid -t $timeout $jobdir/xrsl > $jobdir/log 2>&1
+    if [ ! -r $jobdir/jobid ] ; then
+	msg="Job submission failed"
+	res=$STATE_CRITICAL
+    else
+	msg="Job submission successful"
+	res=$STATE_OK
+    fi
+fi
+
+echo $msg
+exit $res
