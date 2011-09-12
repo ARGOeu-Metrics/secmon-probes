@@ -1,7 +1,7 @@
 SITE=eu.egi.sec
 
 SPECFILE=grid-monitoring-probes-${SITE}.spec
-PROBES=src/wnjob
+PROBES=src/wnjob src/ARC src/probes
 FILES=CHANGES
 
 NOOP    = true
