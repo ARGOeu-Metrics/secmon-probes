@@ -81,7 +81,7 @@ fi
 
 confdir=/usr/libexec/grid-monitoring/probes/eu.egi.sec/ARC/$testname
 
-jobdir=/var/spool/grid-monitoring/$payload/$hostname/$testname
+jobdir=/var/lib/gridprobes/$VO/eu.egi.sec/ARCCE/$hostname/$testname
 mkdir -p $jobdir
 
 if [ -r $jobdir/jobid ] ; then
