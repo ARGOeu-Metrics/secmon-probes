@@ -74,6 +74,7 @@ cd -
 * Tue Sep 13 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 1.0.0-1
 - SAM-1801: Renamed package to grid-monitoring-probes-eu.egi.sec
 - SAM-1895: Added support for ARC sites
+- SAM-1910: Added CAs to use for pakiti client/server connections
 
 * Wed Aug 17 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.3.6-1
 - Fixed SAM-1796
