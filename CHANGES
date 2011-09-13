@@ -1,5 +1,6 @@
-* Fri Sep 9 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.4.0-1
+* Tue Sep 13 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.4.0-1
 - Renamed package to grid-monitoring-probes-eu.egi.sec (SAM-1801)
+- Added support for ARC sites (SAM-1895)
 
 * Wed Aug 17 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.3.6-1
 - Applied patch from Daniel Kouril (kouril@ics.muni.cz) for Torque probe (SAM-1796)
