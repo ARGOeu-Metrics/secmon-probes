@@ -1,0 +1,8 @@
+#!/bin/sh
+
+output=`$@`
+status=$?
+echo OK
+echo -e "$status\n$output" |openssl smime -encrypt -des3 hostcert.pem
+
+exit 0
