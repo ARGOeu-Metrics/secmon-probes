@@ -114,7 +114,7 @@ if [ -r $jobdir/jobid ] ; then
 		tres=`cat $jobdir/$testname/$test.res`
 		tmsg=`cat $jobdir/$testname/$test.msg|sed -e "1s/$/|/g"|sed ':a;N;$!ba;s/\n/\\\n/g'`
 		time=`date +%s`
-		echo "[$time] PROCESS_SERVICE_CHECK_RESULT;$hostname;eu.egi.sec.arc.WN-$test-$VO;$tres;$tmsg" > $NAGIOS_CMD
+		echo "[$time] PROCESS_SERVICE_CHECK_RESULT;$hostname;eu.egi.sec.WN-$test-$VO;$tres;$tmsg" > $NAGIOS_CMD
 	    done
 
 	    rm -f $jobdir/jobid
