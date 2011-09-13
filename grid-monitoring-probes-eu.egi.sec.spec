@@ -45,9 +45,12 @@ export DONT_STRIP=1
 %{__rm} -rf %{buildroot}
 install --directory %{buildroot}%{dir}
 
+# Install probes for general usage
+%{__cp} -pf .%dir/probes  %{buildroot}%{dir}
+
 # gLite configuration
 %{__cp} -rpf .%dir/wnjob  %{buildroot}%{dir}
-%{__cp} -pf .%dir/probes/*  %{buildroot}%{dir}/wnjob/%{site}/probes/%{site}
+%{__ln} -s %{dir}/probes  %{buildroot}%{dir}/wnjob/%{site}/probes/%{site}
 
 # ARC configuration
 %{__cp} -rpf .%dir/ARC  %{buildroot}%{dir}
@@ -60,7 +63,6 @@ cd -
 
 %files
 %defattr(-,root,root,-)
-%{dir}/wnjob
 %{dir}
 
 %changelog
