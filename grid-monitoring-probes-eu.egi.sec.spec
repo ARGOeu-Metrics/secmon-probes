@@ -54,6 +54,7 @@ install --directory %{buildroot}%{dir}
 
 # ARC configuration
 %{__cp} -rpf .%dir/ARC  %{buildroot}%{dir}
+chmod +x %{buildroot}%{dir}/ARC/CE-Jobsubmit
 cd .%dir/probes/
 tar -zcvf %{buildroot}%{dir}/ARC/jobsubmit/probes.tar.gz *
 cd -
