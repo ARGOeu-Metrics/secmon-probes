@@ -1,6 +1,6 @@
 #!/bin/sh
 
-probes="CRL FilePermVulns Pakiti Permissions RDSModuleCheck Torque"
+probes="FilePermVulns Pakiti Permissions RDSModuleCheck Torque"
 
 tar -zxf probes.tar.gz
 
