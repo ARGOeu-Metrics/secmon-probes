@@ -50,7 +50,7 @@ install --directory %{buildroot}%{dir}
 
 # gLite configuration
 %{__cp} -rpf .%dir/gLite  %{buildroot}%{dir}
-%{__ln} -s %{dir}/probes  %{buildroot}%{dir}/gLite/wnjob/%{site}/probes/%{site}
+ln -s %{dir}/probes  %{buildroot}%{dir}/gLite/wnjob/%{site}/probes/%{site}
 
 # ARC configuration
 %{__cp} -rpf .%dir/ARC  %{buildroot}%{dir}
