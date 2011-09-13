@@ -1,6 +1,10 @@
 #!/bin/bash
 cur_path=`dirname $0`
 
+if [ "X"$SITE_NAME == "X" ] && [ "X"$GLOBUS_CE != "X" ] && [ "X"$LCG_GFAL_INFOSYS != "X" ]; then
+	export SITE_NAME=`ldapsearch -LL -x -h $LCG_GFAL_INFOSYS -b o=grid "(GlueClusterService=$GLOBUS_CE)" GlueForeignKey |grep GlueSiteUniqueID|awk -F= '{print $2}'`
+fi
+
 result=`${cur_path}/pakiti-client 2>&1`
 exit_status=$?
 
