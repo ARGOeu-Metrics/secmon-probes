@@ -1,6 +1,7 @@
 #!/bin/bash
 cur_path=`dirname $0`
-result=`${cur_path}/pakiti-client 2>&1`
+
+result=`${cur_path}/pakiti-client -a ${cur_path}/pakiti_cas 2>&1`
 exit_status=$?
 
 if [ ${exit_status} == 0 ]; then
