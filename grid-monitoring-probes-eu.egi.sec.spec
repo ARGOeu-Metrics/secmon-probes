@@ -46,7 +46,7 @@ export DONT_STRIP=1
 install --directory %{buildroot}%{dir}
 
 # Install probes for general usage
-%{__cp} -pf .%dir/probes  %{buildroot}%{dir}
+%{__cp} -rpf .%dir/probes  %{buildroot}%{dir}
 
 # gLite configuration
 %{__cp} -rpf .%dir/gLite  %{buildroot}%{dir}
