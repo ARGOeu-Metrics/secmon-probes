@@ -3,8 +3,11 @@
 (jobname = "jobsubmit")
 (stdout = "testjob.out")
 (stderr = "testjob.err")
-(inputfiles = ("testjob.sh" "/usr/libexec/grid-monitoring/probes/eu.egi.sec/ARC/jobsubmit/testjob.sh")
-              ("probes.tar.gz" "/usr/libexec/grid-monitoring/probes/eu.egi.sec/ARC/jobsubmit/probes.tar.gz"))
+(inputfiles = 
+               ("testjob.sh" "/usr/libexec/grid-monitoring/probes/eu.egi.sec/ARC/jobsubmit/testjob.sh")
+               ("probes.tar.gz" "/usr/libexec/grid-monitoring/probes/eu.egi.sec/ARC/jobsubmit/probes.tar.gz")
+               ("sitename" "sitename_loc")
+)
 (outputfiles = ("testjob.out" "")("testjob.err" "")
                (FilePermVulns.msg "")(FilePermVulns.res "")
                (Pakiti.msg "")(Pakiti.res "")

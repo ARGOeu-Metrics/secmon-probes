@@ -1,6 +1,7 @@
 #!/bin/sh
 
 probes="FilePermVulns Pakiti Permissions RDSModuleCheck Torque"
+export SITE_NAME=`cat sitename 2> /dev/null`
 
 tar -zxf probes.tar.gz
 

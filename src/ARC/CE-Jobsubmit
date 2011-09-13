@@ -140,7 +140,8 @@ if [ -r $jobdir/jobid ] ; then
 fi
 
 if [ ! -r $jobdir/jobid ] ; then
-    cp -p $confdir/xrsl $jobdir/xrsl
+    echo $NAGIOS__HOSTSITE_NAME > $jobdir/sitename
+    cat $confdir/xrsl | sed -e "s#sitename_loc#$jobdir/sitename#g" > $jobdir/xrsl
     ngsub -c $hostname -o $jobdir/jobid -t $timeout $jobdir/xrsl > $jobdir/log 2>&1
     if [ ! -r $jobdir/jobid ] ; then
 	msg="Job submission failed"
