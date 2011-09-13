@@ -8,20 +8,24 @@ Name: grid-monitoring-probes-eu.egi.sec
 Version: 0.4.0
 Release: 1%{?dist}
 
-License: GPL
-Group: Network/Monitoring
+License: ASL 2.0
+Group: Applications/System
 Source0: %{name}-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Requires: grid-monitoring-probes-org.sam > 0.1.4-5
 AutoReqProv: no
 BuildArch: noarch
-BuildRequires: python >= 2.3
 Obsoletes: grid-monitoring-probes-org.sam.sec
 
 %description
-Includes a check_and_encrypt to command in order to encrypt the results of security probes.
+This package includes the framework to submit grid jobs to monitor the security of the EGI sites.
+Special care has been taken so that results of the probes are transmitted back to the Nagios server using a secure channel.
 
-Contains the following Nagios probes: 
+Currently it supports the following middlewares:
+- gLite
+- ARC
+
+Additionally it contains the following Nagios probes: 
 * WN-pakiti
 - Pakiti results from the tested WN are sent to configured pakiti server(s). The probe reports to Nagios whether the reporting to Pakiti server(s) was successful.
 * WN-CRL
@@ -67,7 +71,7 @@ cd -
 %{dir}
 
 %changelog
-* Tue Sep 13 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 0.4.0-1
+* Tue Sep 13 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 1.0.0-1
 - SAM-1801: Renamed package to grid-monitoring-probes-eu.egi.sec
 - SAM-1895: Added support for ARC sites
 
