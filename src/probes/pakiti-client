@@ -5,8 +5,8 @@ CONF=''
 SERVERS="pakiti.egi.eu:443 poros.ics.muni.cz:443"
 SERVER_URL="/feed/"
 METHOD="autodetect"
-OPENSSL_BIN=`which openssl`
-CURL_BIN=`which curl`
+OPENSSL_BIN=`which openssl 2>/dev/null`
+CURL_BIN=`which curl 2>/dev/null`
 TAG="Nagios"
 CA_PATH="/etc/grid-security/certificates"
 HOST_CERT=""
@@ -271,20 +271,44 @@ else
   fi
 fi
 
-# Detect OS (especially for Debian-like systems, RH based has package i.e. redhat-release which represents OS version)
+# Detect OS (try to help server to detecet correct OS version
 OS="unknown"
-for i in /etc/debian_version; do
-	if [ -f $i ]; then
-		case "${i}" in
-			/etc/debian_version)
-			OS="Debian `cat ${i}`"
-		 	;;
-	 	esac
- 	fi
- 	if [ "${OS}" != "unknown" ]; then
-	 	break
- 	fi
+# Try to use lsb_release
+LSB=`which lsb_release 2>/dev/null`
+if [ -x "${LSB}" ]; then
+  OS_DISTRIBUTOR=`lsb_release -i |  sed -e 's/^Distributor ID:[\s]*\(.*\)/\1/'`
+  OS_RELEASE=`lsb_release -r |  sed -e 's/^Release:[\s]*\(.*\)/\1/'`
+  OS="${OS_DISTRIBUTOR} ${OS_RELEASE}"
+fi
+
+if [ "${OS}" = "unknown" ]; then
+# Try to get OS from configuration file
+for i in /etc/debian_version /etc/lsb-release /etc/fermi-release /etc/redhat-release /etc/fedora-release /etc/SuSE-release; do
+  if [ -f $i ]; then
+	case "${i}" in
+	  /etc/debian_version)
+	    OS="Debian `cat ${i}`"
+	  ;;
+	  /etc/lsb-release)
+	    OS_DISTRIBUTOR=`echo ${i} | grep DISTRIB_ID | sed -e 's/DISTRIB_ID="\(.*\)"/\1/'`
+	    if [ -z "${OS}" ]; then
+              OS_RELEASE=`echo ${i} | grep DISTRIB_RELEASE | sed -e 's/DISTRIB_RELEASE="\(.*\)"/\1/'`
+	    fi
+	    OS="$OS_DISTRIBUTOR $OS_RELEASE"
+	  ;;
+	  /etc/fermi-release|/etc/redhat-release|/etc/fedora-release)
+	    OS=`cat ${i}`
+	  ;;
+	  /etc/SuSE-release)
+	    OS=`grep -i suse ${i}`
+	  ;;
+ 	esac
+  fi
+  if [ "${OS}" != "unknown" ]; then
+ 	break
+  fi
 done 
+fi
 
 SERVERS_REPORTED_CORRECTLY=0
 # Iterate over all servers
