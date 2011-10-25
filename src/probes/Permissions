@@ -4,6 +4,8 @@ NAGIOS_OK=0
 NAGIOS_WARNING=1
 NAGIOS_ERROR=2
 
+BLACKLISTED_PATERNS="^/tmp /lsf"
+
 function echo_error_or_warning() {
    # If the file/dir is in $PATH, then echo an ERROR.
    # else, echo a WARNING
@@ -146,6 +148,16 @@ for env in $envs ; do
    for n in $val; do # For each directory/file in the environment variable do: 
       IFS=$OIFS
       if [ -n "$n" ]; then
+         found_blacklisted=0
+         for b in $BLACKLISTED_PATERNS; do
+            echo "$n" | grep $b > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+               found_blacklisted=1
+               break
+            fi
+         done
+         [ $found_blacklisted -eq 1 ] && continue
+
          check_file_or_dir $n
       fi
       IFS=":"

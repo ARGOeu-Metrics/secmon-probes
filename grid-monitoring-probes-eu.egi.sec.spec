@@ -5,7 +5,7 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 1.0.0
+Version: 1.0.1
 Release: 1%{?dist}
 
 License: ASL 2.0
@@ -71,6 +71,10 @@ cd -
 %{dir}
 
 %changelog
+* Tue Oct 25 2011 Christos Triantafyllidis <ctria@grid.auth.gR> - 1.0.1-1
+- SAM-2104: Blacklisting directories in Permissions probe
+- SAM-2105: Torque probe failing to execute qmgr
+
 * Tue Sep 13 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 1.0.0-1
 - SAM-1801: Renamed package to grid-monitoring-probes-eu.egi.sec
 - SAM-1895: Added support for ARC sites

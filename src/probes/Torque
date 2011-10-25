@@ -9,8 +9,9 @@ NAGIOS_UNKNOWN=3
 type qmgr 2>/dev/null
 [ $? -ne 0 ] && echo "qmgr is not available. Assuming that other LRMS is used." && exit $NAGIOS_OK
 
-QMGR_RESULT=`qmgr -c "pr se" 2>&1`
-if [ $? != "0" ]
+QMGR_RESULT=$(qmgr -c "pr se" 2>&1)
+RES=$?
+if [ ${RES} != "0" ]
 then
    echo "qmgr execution failed"
    exit $NAGIOS_UNKNOWN
