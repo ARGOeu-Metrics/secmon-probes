@@ -1,4 +1,7 @@
-* Tue Oct 25 2011 Christos Triantafyllidis <ctria@grid.auth.gR> - 1.0.1-1
+* Tue Oct 25 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 1.0.2-1
+- Fixed typos in Pakiti probe wrapper (SAM-2106)
+
+* Tue Oct 25 2011 Christos Triantafyllidis <ctria@grid.auth.gr> - 1.0.1-1
 - Added blacklisting of files/directories in Permissions probe (SAM-2104)
 - Fixed torque probe that was failing to execute qmgr (SAM-2105)
 

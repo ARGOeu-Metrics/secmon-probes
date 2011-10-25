@@ -2,11 +2,11 @@
 cur_path=`dirname $0`
 
 if [ "X"$SITE_NAME == "X" ] && [ "X"$LCG_GFAL_INFOSYS != "X" ]; then
-	if [ "X"$GLOBUS_CE != "X" ];
+	if [ "X"$GLOBUS_CE != "X" ]; then
 		export SITE_NAME=`ldapsearch -LL -x -h $LCG_GFAL_INFOSYS -b o=grid "(GlueClusterService=$GLOBUS_CE)" GlueForeignKey |grep GlueSiteUniqueID|awk -F= '{print $2}'`
-	elif [ "X"$CE_ID != "X" ];
+	elif [ "X"$CE_ID != "X" ]; then
 		export SITE_NAME=`ldapsearch -LL -x -h $LCG_GFAL_INFOSYS -b o=grid "(GlueClusterService=$CE_ID)" GlueForeignKey |grep GlueSiteUniqueID|awk -F= '{print $2}'`
-	if
+	fi
 fi
 
 result=`${cur_path}/pakiti-client 2>&1`
