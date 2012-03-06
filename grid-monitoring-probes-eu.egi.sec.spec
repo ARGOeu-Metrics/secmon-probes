@@ -5,7 +5,7 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 1.0.3
+Version: 1.0.4
 Release: 1%{?dist}
 
 License: ASL 2.0
@@ -71,6 +71,9 @@ cd -
 %{dir}
 
 %changelog
+* Tue Mar 6 2012 Christos Triantafyllidis <ctria@grid.auth.gr> - 1.0.4-1
+- SAM-2463: Ability to ignore expired CRLs on CRL check
+
 * Tue Mar 6 2012 Christos Triantafyllidis <ctria@grid.auth.gr> - 1.0.3-1
 - SAM-2463: Ability to ignore expired CRLs on CRL check
 

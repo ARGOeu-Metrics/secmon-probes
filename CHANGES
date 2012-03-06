@@ -1,3 +1,6 @@
+* Tue Mar 6 2012 Christos Triantafyllidis <ctria@grid.auth.gr> - 1.0.4-1
+- Added ability to ignore expired CRLs on CRL check (SAM-2463)
+
 * Tue Mar 6 2012 Christos Triantafyllidis <ctria@grid.auth.gr> - 1.0.3-1
 - Added ability to ignore expired CRLs on CRL check (SAM-2463)
 
