@@ -11,6 +11,15 @@ NAGIOS_WARNING=1
 NAGIOS_ERROR=2
 NAGIOS_UNKNOWN=3
 
+IGNORECRL=0
+while getopts :n opt; do
+  case $opt in
+    n)
+      IGNORECRL=1
+    ;;
+  esac
+done
+
 #
 # Changed this to use seconds since the epoch, which actually is standard and can be 
 # compared to something else. Using YYYYMMDDhh assumes a day has 100 hours, and a month
@@ -120,15 +129,19 @@ else
 				crl_check=$NAGIOS_ERROR
 			fi
 		else
-			NextUpdateOfCRL "$I_CRL"
-			today=`date -u '+%s'`
-			d=$((nextUpdate-today))
-			if [ $d -le 0 ]; then
-				OUTPUT=${OUTPUT}"$SUBF CRL expired $((-$d/3600)) hours ago\n"
-				crl_check=$NAGIOS_ERROR
-			elif [ $d -le $((WARN*60)) ]; then
-				OUTPUT=${OUTPUT}"$SUBF CRL is expiring in less than $((WARN/60)) hours ($nextUpdateText)\n"
-				crl_check=$NAGIOS_WARNING
+			if [ "$IGNORECRL" == "1" ]; then
+				OUTPUT=${OUTPUT}"CRL expiration check is disabled\n"
+			else
+				NextUpdateOfCRL "$I_CRL"
+				today=`date -u '+%s'`
+				d=$((nextUpdate-today))
+				if [ $d -le 0 ]; then
+					OUTPUT=${OUTPUT}"$SUBF CRL expired $((-$d/3600)) hours ago\n"
+					crl_check=$NAGIOS_ERROR
+				elif [ $d -le $((WARN*60)) ]; then
+					OUTPUT=${OUTPUT}"$SUBF CRL is expiring in less than $((WARN/60)) hours ($nextUpdateText)\n"
+					crl_check=$NAGIOS_WARNING
+				fi
 			fi
 		fi
 	done
@@ -145,7 +158,7 @@ else
 	echo "ERROR: Some errors found. Please check details."
 fi
 
-echo -en "${OUTPUT}"
+echo -en "${OUTPUT}"|uniq
 
 exit $crl_check
 #****
