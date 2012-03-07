@@ -10,6 +10,7 @@ CURL_BIN=`which curl 2>/dev/null`
 TAG="Nagios"
 CA_PATH=`dirname $0`"/pakiti_cas"
 HOST_CERT=""
+HOST_KEY=""
 REPORT=0
 SERVER_REPORT_STATS=1
 IS_PROXY=0
@@ -40,6 +41,7 @@ Usage: `basename $0` [-v] [-h] [-d] [-r] [-y] [-x] [-c configuration file] [-s s
  -t [name of the tag] (default: $TAG)
  -a [path to the CA certificates directory] (default: $CA_PATH)
  -e [path to the host key+cert]
+ -f [path to the host key, if it was not supplied together with certificate]
  -i [name of the interface used to send the data to the Pakiti server] 
 
 "
@@ -100,6 +102,7 @@ while getopts "dvhrc:yxs:u:m:o:l:t:a:e:i:" options; do
     t ) A_TAG=$OPTARG;;
     a ) A_CA_PATH=$OPT_ARG;;
     e ) A_HOST_CERT=$OPTARG;;
+    f ) A_HOST_KEY=$OPTARG;;
     i ) A_INTERFACE=$OPTARG;;
     * ) echo -e "$usage"
 	quit 1;;
@@ -118,6 +121,7 @@ else
   L_CURL_BIN=`grep "^[[:blank:]]*curl_path[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}'`
   L_CA_PATH=`grep "^[[:blank:]]*ca_certificate[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}' | tr -d " "`
   L_HOST_CERT=`grep "^[[:blank:]]*host_cert[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}'`
+  L_HOST_KEY=`grep "^[[:blank:]]*host_key[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}'`
   L_TAG=`grep "^[[:blank:]]*tag[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}' | tr -d " "`
   L_METHOD=`grep "^[[:blank:]]*connection_method[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}' | tr -d " "`
   L_REPORT=`grep "^[[:blank:]]*report[[:blank:]]*=" ${CONF} | grep -v \# | awk -F "=" '{print $2}' | tr -d " "`
@@ -145,6 +149,9 @@ fi
   if [ ! -z "${L_HOST_CERT}" ];	then HOST_CERT=${L_HOST_CERT}; fi
   if [ ! -z "${A_HOST_CERT}" ];	then HOST_CERT=${A_HOST_CERT}; fi
   
+  if [ ! -z "${L_HOST_KEY}" ]; then HOST_KEY=${L_HOST_KEY}; fi
+  if [ ! -z "${A_HOST_KEY}" ]; then HOST_KEY=${A_HOST_KEY}; fi
+
   if [ ! -z "${L_TAG}" ]; then TAG=${L_TAG}; fi
   if [ ! -z "${A_TAG}" ]; then TAG=${A_TAG}; fi
   
@@ -266,48 +273,54 @@ else
      fi
   fi
 
+  # Detect OS (try to help server to detecet correct OS version
+  OS="unknown"
+  # Try to use lsb_release
+  LSB=`which lsb_release 2>/dev/null`
+  if [ -x "${LSB}" ]; then
+    OS_DISTRIBUTOR=`lsb_release -i | sed -e 's/^Distributor ID:[[:blank:]]*\(.*\)/\1/'`
+    OS_RELEASE=`lsb_release -r | sed -e 's/^Release:[[:blank:]]*\(.*\)/\1/'`
+    OS="${OS_DISTRIBUTOR} ${OS_RELEASE}"
+  fi
+  
+  if [ "${OS}" = "unknown" ]; then
+  # Try to get OS from configuration file
+  for i in /etc/debian_version /etc/lsb-release /etc/fermi-release /etc/redhat-release /etc/fedora-release /etc/SuSE-release; do
+    if [ -f $i ]; then
+  	case "${i}" in
+  	  /etc/debian_version)
+  	    OS="Debian `cat ${i}`"
+  	  ;;
+  	  /etc/lsb-release)
+  	    OS_DISTRIBUTOR=`echo ${i} | grep DISTRIB_ID | sed -e 's/DISTRIB_ID="\(.*\)"/\1/'`
+  	    if [ -z "${OS}" ]; then
+                OS_RELEASE=`echo ${i} | grep DISTRIB_RELEASE | sed -e 's/DISTRIB_RELEASE="\(.*\)"/\1/'`
+  	    fi
+  	    OS="$OS_DISTRIBUTOR $OS_RELEASE"
+  	  ;;
+  	  /etc/fermi-release|/etc/redhat-release|/etc/fedora-release)
+  	    OS=`cat ${i}`
+  	  ;;
+  	  /etc/SuSE-release)
+  	    OS=`grep -i suse ${i}`
+  	  ;;
+   	esac
+    fi
+    if [ "${OS}" != "unknown" ]; then
+   	break
+    fi
+  done 
+  fi
+
   if [ ${VERBOSE} -eq 1 ]; then
      echo -e "Done."
   fi
 fi
 
-# Detect OS (try to help server to detecet correct OS version
-OS="unknown"
-# Try to use lsb_release
-LSB=`which lsb_release 2>/dev/null`
-if [ -x "${LSB}" ]; then
-  OS_DISTRIBUTOR=`lsb_release -i |  sed -e 's/^Distributor ID:[\s]*\(.*\)/\1/'`
-  OS_RELEASE=`lsb_release -r |  sed -e 's/^Release:[\s]*\(.*\)/\1/'`
-  OS="${OS_DISTRIBUTOR} ${OS_RELEASE}"
-fi
-
-if [ "${OS}" = "unknown" ]; then
-# Try to get OS from configuration file
-for i in /etc/debian_version /etc/lsb-release /etc/fermi-release /etc/redhat-release /etc/fedora-release /etc/SuSE-release; do
-  if [ -f $i ]; then
-	case "${i}" in
-	  /etc/debian_version)
-	    OS="Debian `cat ${i}`"
-	  ;;
-	  /etc/lsb-release)
-	    OS_DISTRIBUTOR=`echo ${i} | grep DISTRIB_ID | sed -e 's/DISTRIB_ID="\(.*\)"/\1/'`
-	    if [ -z "${OS}" ]; then
-              OS_RELEASE=`echo ${i} | grep DISTRIB_RELEASE | sed -e 's/DISTRIB_RELEASE="\(.*\)"/\1/'`
-	    fi
-	    OS="$OS_DISTRIBUTOR $OS_RELEASE"
-	  ;;
-	  /etc/fermi-release|/etc/redhat-release|/etc/fedora-release)
-	    OS=`cat ${i}`
-	  ;;
-	  /etc/SuSE-release)
-	    OS=`grep -i suse ${i}`
-	  ;;
- 	esac
-  fi
-  if [ "${OS}" != "unknown" ]; then
- 	break
-  fi
-done 
+if [ "X${METHOD}" = "Xstdout" ]; then
+  echo -e "type=\"${TYPE}\",host=\"${REPHOST}\",os=\"${OS}\",tag=\"${TAG}\",kernel=\"${KERNEL}\",arch=\"${ARCH}\",site=\"${SITE}\",version=\"${PROTOCOL_VERSION}\",report=\"${REPORT}\"\n"
+  cat $TMPFILE | sed -e 's/%2b/\+/g'
+  quit 0
 fi
 
 SERVERS_REPORTED_CORRECTLY=0
@@ -338,6 +351,10 @@ for SERVER in $SERVERS; do
 		if [ "X${HOST_CERT}" != "X" ]; then
 			OPENSSL="${OPENSSL} -cert \"${HOST_CERT}\""
 		fi
+
+		if [ "X${HOST_KEY}" != "X" ]; then
+                        OPENSSL="${OPENSSL} -key \"${HOST_KEY}\""
+                fi
 
 		# Replace + with %2b
 		sed -i -e 's/\+/%2b/g' ${TMPFILE}
@@ -389,6 +406,10 @@ for SERVER in $SERVERS; do
 		if [ "X${HOST_CERT}" != "X" ]; then
 			CURL="${CURL} --cert \"${HOST_CERT}\""
 		fi
+
+		if [ "X${HOST_KEY}" != "X" ]; then
+                        CURL="${CURL} --key \"${HOST_KEY}\""
+                fi
 		
 		CURL="${CURL} -F type=\"${TYPE}\""
 		CURL="${CURL} -F host=\"${REPHOST}\""
@@ -402,11 +423,6 @@ for SERVER in $SERVERS; do
 		CURL="${CURL} -F site=\"${SITE}\""
 		CURL="${CURL} -F pkgs=\<${TMPFILE}"
 		COMMAND="${CURL_BIN}${CURL} https://${SERVER}${SERVER_URL}"
-	
-	elif [ "X${METHOD}" = "Xstdout" ]; then
-		echo -e "type=\"${TYPE}\",host=\"${REPHOST}\",os=\"${OS}\",tag=\"${TAG}\",kernel=\"${KERNEL}\",arch=\"${ARCH}\",site=\"${SITE}\",version=\"${PROTOCOL_VERSION}\",report=\"${REPORT}\"\n"
-
-		cat $TMPFILE | sed -e 's/%2b/\+/g'
 	fi
 	
 	# Run prepared command

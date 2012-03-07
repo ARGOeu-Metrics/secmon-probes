@@ -4,7 +4,7 @@ NAGIOS_OK=0
 NAGIOS_WARNING=1
 NAGIOS_ERROR=2
 
-BLACKLISTED_PATERNS="^/tmp /lsf"
+BLACKLISTED_PATERNS="^/tmp /lsf .snapshot"
 
 function echo_error_or_warning() {
    # If the file/dir is in $PATH, then echo an ERROR.

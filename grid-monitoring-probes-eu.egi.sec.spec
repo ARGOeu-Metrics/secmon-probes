@@ -71,6 +71,10 @@ cd -
 %{dir}
 
 %changelog
+* Wed Mar 7 2012 Christos Triantafyllidis <ctria@grid.auth.gr> - 1.0.5-1
+- SAM-2465: Add .snapshot to blacklisted directories for Permissions probe
+- Updated pakiti-client
+
 * Tue Mar 6 2012 Christos Triantafyllidis <ctria@grid.auth.gr> - 1.0.4-1
 - SAM-2463: Ability to ignore expired CRLs on CRL check
 
