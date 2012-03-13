@@ -5,7 +5,7 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 1.0.5
+Version: 1.0.6
 Release: 1%{?dist}
 
 License: ASL 2.0
@@ -71,6 +71,9 @@ cd -
 %{dir}
 
 %changelog
+* Tue Mar 13 2012 Christos Triantafyllidis <ctria@grid.auth.gr> - 1.0.6-1
+- Fixed Permission blacklisting issues
+
 * Wed Mar 7 2012 Christos Triantafyllidis <ctria@grid.auth.gr> - 1.0.5-1
 - SAM-2465: Add .snapshot to blacklisted directories for Permissions probe
 - Updated pakiti-client

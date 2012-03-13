@@ -4,7 +4,7 @@ NAGIOS_OK=0
 NAGIOS_WARNING=1
 NAGIOS_ERROR=2
 
-BLACKLISTED_PATERNS="^/tmp /lsf .snapshot"
+BLACKLISTED_PATERNS="^/tmp /lsf /.snapshot"
 
 function echo_error_or_warning() {
    # If the file/dir is in $PATH, then echo an ERROR.
@@ -29,6 +29,17 @@ function echo_error_or_warning() {
 function check_privileges() {
    # Check if file or directory passed as argument has write permission to Other group.
    filename=$1
+   
+   found_blacklisted=0
+   for b in $BLACKLISTED_PATERNS; do
+      echo "$filename" | egrep -e "$b" > /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+         found_blacklisted=1
+         break
+      fi
+   done
+   [ $found_blacklisted -eq 1 ] && continue
+   
    if [ -d "$filename" -o -f "$filename" ]; then             # It's an existing file or directory 
       if ! [ -h "$filename" -o -b "$filename" -o -c "$filename" -o -p "$filename" -o -S "$filename" ]; then
          # It's not a symbolic link, block special, special character, pipe or socket
@@ -148,16 +159,6 @@ for env in $envs ; do
    for n in $val; do # For each directory/file in the environment variable do: 
       IFS=$OIFS
       if [ -n "$n" ]; then
-         found_blacklisted=0
-         for b in $BLACKLISTED_PATERNS; do
-            echo "$n" | grep $b > /dev/null 2>&1
-            if [ $? -eq 0 ]; then
-               found_blacklisted=1
-               break
-            fi
-         done
-         [ $found_blacklisted -eq 1 ] && continue
-
          check_file_or_dir $n
       fi
       IFS=":"
