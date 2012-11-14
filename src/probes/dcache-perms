@@ -1,0 +1,30 @@
+#!/bin/bash
+
+NAGIOS_OK=0
+NAGIOS_WARNING=1
+NAGIOS_ERROR=2
+NAGIOS_UNKNOWN=3
+
+DIRS="/usr/share/srm/lib /usr/share/srm/conf"
+
+start_time=`date -u +%s`
+
+list=$(find $DIRS \( -type f -or -type d \) -perm /g+w,o+w,a+st -printf "%h\n")
+
+end_time=`date -u +%s`
+
+if [ -z "$list" ]; then
+    echo "No vulnerable permissions found in \"$DIRS\""
+    return_code=$NAGIOS_OK
+else
+    echo "Vulnerable permissions (g+w,o+w,a+st) found in \"${DIRS}\":"
+    echo $list
+    return_code=$NAGIOS_ERROR
+fi
+
+seconds=$(($end_time - $start_time))
+echo "******************************************"
+echo "*  Time to execute this test: ${seconds} seconds  *"
+echo "******************************************"
+
+exit $return_code
