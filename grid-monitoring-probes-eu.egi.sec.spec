@@ -5,8 +5,8 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 1.0.6
-Release: 4%{?dist}
+Version: 1.0.7
+Release: 1%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -25,7 +25,7 @@ Currently it supports the following middlewares:
 - gLite
 - ARC
 
-Additionally it contains the following Nagios probes: 
+Additionally it contains the following Nagios probes:
 * WN-pakiti
 - Pakiti results from the tested WN are sent to configured pakiti server(s). The probe reports to Nagios whether the reporting to Pakiti server(s) was successful.
 * WN-CRL
@@ -38,6 +38,8 @@ Additionally it contains the following Nagios probes:
 - Checks if an RDS socket can be opened (blacklisted as a mitigation for CVE-2010-3904)
 * WN-Torque
 - Checks if torque server has vulnerable options
+* WN-dcache-perms
+- Check for vulnerable permissions in dcache related folders.
 
 %prep
 %setup -q
@@ -71,6 +73,10 @@ cd -
 %{dir}
 
 %changelog
+* Mon Nov 19 2012 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.7-1
+- Fixed issue about dcache-perms failing to be scheduled.
+- Fixed, wrong version number.
+
 * Wed Nov 14 2012 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.6-4
 - Added dcache-perm probe
 
