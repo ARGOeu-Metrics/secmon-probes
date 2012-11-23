@@ -5,14 +5,13 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 1.0.7
+Version: 1.0.8
 Release: 1%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
 Source0: %{name}-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-Requires: grid-monitoring-probes-org.sam > 0.1.4-5
 AutoReqProv: no
 BuildArch: noarch
 Obsoletes: grid-monitoring-probes-org.sam.sec
@@ -73,6 +72,8 @@ cd -
 %{dir}
 
 %changelog
+* Fri Nov 23 2012 Paschalis Korosoglou <pkoro@grid.auth.gr> - 1.0.8-1
+- Removed dependency on org.sam
 * Mon Nov 19 2012 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.7-1
 - Fixed issue about dcache-perms failing to be scheduled.
 - Fixed, wrong version number.
