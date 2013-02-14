@@ -74,6 +74,7 @@ cd -
 %changelog
 * Fri Nov 23 2012 Paschalis Korosoglou <pkoro@grid.auth.gr> - 1.0.8-1
 - Removed dependency on org.sam
+
 * Mon Nov 19 2012 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.7-1
 - Fixed issue about dcache-perms failing to be scheduled.
 - Fixed, wrong version number.
