@@ -6,12 +6,13 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.8
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
 Source0: %{name}-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+Requires: emi-cream-nagios
 AutoReqProv: no
 BuildArch: noarch
 Obsoletes: grid-monitoring-probes-org.sam.sec
@@ -72,6 +73,9 @@ cd -
 %{dir}
 
 %changelog
+* Thu Feb 14 2012 Anastasis Andronidis <andronat@grid.auth.gr> - 1.0.8-2
+- Added dependency on emi-cream-nagios
+
 * Fri Nov 23 2012 Paschalis Korosoglou <pkoro@grid.auth.gr> - 1.0.8-1
 - Removed dependency on org.sam
 
@@ -178,3 +182,4 @@ cd -
   * grid-monitoring-probes-org.sam > 0.1.4-5
 - Contains probes:
   * WN-Pakiti
+
