@@ -5,8 +5,8 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 1.0.8
-Release: 2%{?dist}
+Version: 1.0.9
+Release: 1%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -40,6 +40,9 @@ Additionally it contains the following Nagios probes:
 - Checks if torque server has vulnerable options
 * WN-dcache-perms
 - Check for vulnerable permissions in dcache related folders.
+* WN-libkeyutils
+- check for any hosts that have a file matching the glob
+pattern libkeyutils.so* that doesn't belong to an installed RPM package
 
 %prep
 %setup -q
@@ -73,6 +76,9 @@ cd -
 %{dir}
 
 %changelog
+* Mon Feb 25 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.9-1
+- Added libkeyutils probe
+
 * Thu Feb 14 2013 Anastasis Andronidis <andronat@grid.auth.gr> - 1.0.8-2
 - Added dependency on emi-cream-nagios
 
