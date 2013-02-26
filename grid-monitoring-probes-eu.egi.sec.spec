@@ -76,7 +76,7 @@ cd -
 %{dir}
 
 %changelog
-* Mon Feb 25 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.9-3
+* Tue Feb 26 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.9-3
 - Defined service libkeyutils in gLite services.cfg
 
 * Mon Feb 25 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.9-2
