@@ -5,8 +5,8 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 1.0.9
-Release: 4%{?dist}
+Version: 1.0.10
+Release: 1%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -43,7 +43,8 @@ Additionally it contains the following Nagios probes:
 * WN-libkeyutils
 - check for any hosts that have a file matching the glob
 pattern libkeyutils.so* that doesn't belong to an installed RPM package
-
+* WN-CVE-2013-2094 
+- check for hosts with old vulnerable kernels
 %prep
 %setup -q
 
@@ -76,6 +77,9 @@ cd -
 %{dir}
 
 %changelog
+* Wed May 22 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.10-1
+- Added WN-CVE-2013-2094 probe
+
 * Tue Feb 26 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.9-4
 - Fixed changelog date.
 
