@@ -14,6 +14,7 @@
                (Permissions.msg "")(Permissions.res "")
                (RDSModuleCheck.msg "")(RDSModuleCheck.res "")
                (Torque.msg "")(Torque.res "")
+               (check_CVE-2013-2094.msg "")(check_CVE-2013-2094.res "")
 )
 (walltime = "15 min")
 (memory = "256")
