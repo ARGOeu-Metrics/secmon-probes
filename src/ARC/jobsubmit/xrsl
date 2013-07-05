@@ -17,4 +17,4 @@
                (check_CVE-2013-2094.msg "")(check_CVE-2013-2094.res "")
 )
 (walltime = "15 min")
-(memory = "256")
+(memory = "640")

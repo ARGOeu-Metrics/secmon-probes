@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.10
-Release: 7%{?dist}
+Release: 8%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -77,6 +77,9 @@ cd -
 %{dir}
 
 %changelog
+* Fri Jul 05 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.10-8
+- increased memory limit for ARC probes 
+
 * Thu Jun 06 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.10-7
 - check_CVE-2013-2094 probe was not added into the ARC testjob 
 
