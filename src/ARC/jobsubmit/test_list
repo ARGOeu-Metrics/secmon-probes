@@ -4,3 +4,4 @@ Permissions
 RDSModuleCheck
 Torque
 check_CVE-2013-2094
+check_EGI-SVG-2013-5890

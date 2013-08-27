@@ -5,8 +5,8 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 1.0.10
-Release: 8%{?dist}
+Version: 1.0.11
+Release: 1%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -43,8 +43,10 @@ Additionally it contains the following Nagios probes:
 * WN-libkeyutils
 - check for any hosts that have a file matching the glob
 pattern libkeyutils.so* that doesn't belong to an installed RPM package
-* WN-CVE-2013-2094 
+* WN-check_CVE-2013-2094 
 - check for hosts with old vulnerable kernels
+* WN-check_EGI-SVG-2013-5890 
+- check for hosts with cvmfs local root exploit vulnerability
 %prep
 %setup -q
 
@@ -77,6 +79,9 @@ cd -
 %{dir}
 
 %changelog
+* Tue Aug 27 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.10-9
+- check_EGI-SVG-2013-5890 added 
+
 * Fri Jul 05 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.10-8
 - increased memory limit for ARC probes 
 

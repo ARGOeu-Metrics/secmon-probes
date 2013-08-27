@@ -15,6 +15,7 @@
                (RDSModuleCheck.msg "")(RDSModuleCheck.res "")
                (Torque.msg "")(Torque.res "")
                (check_CVE-2013-2094.msg "")(check_CVE-2013-2094.res "")
+               (check_EGI-SVG-2013-5890.msg "")(check_EGI-SVG-2013-5890.res "")
 )
 (walltime = "15 min")
 (memory = "640")
