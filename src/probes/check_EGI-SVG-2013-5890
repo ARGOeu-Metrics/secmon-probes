@@ -2,7 +2,7 @@
 
 # nagios check for cvmfs local root exploit
 
-PROBE_VERSION="v0.4"
+PROBE_VERSION="v0.5"
 
 NAGIOS_OK=0
 NAGIOS_WARNING=1
@@ -38,7 +38,7 @@ fi
 MD5SUM=$(md5sum /etc/auto.cvmfs)
 
 if [ -z "$MSG" ]; then
-  echo "CRITICAL: ${VERSION}  package found without hotfix"
+  echo "CRITICAL: ${VERSION} package found at `hostname` node  without hotfix"
   echo "MD5 hash found $(md5sum /etc/auto.cvmfs)"
   echo "probe version ${PROBE_VERSION}"
   exit $NAGIOS_ERROR
