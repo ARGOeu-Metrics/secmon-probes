@@ -2,7 +2,7 @@
 
 # nagios check for cvmfs local root exploit
 
-PROBE_VERSION="v0.5"
+PROBE_VERSION="v0.6"
 
 NAGIOS_OK=0
 NAGIOS_WARNING=1
@@ -30,7 +30,7 @@ fi
 if [ $BRANCH == 2.1 ]; then
   if (( "$BUILD" >= "14" )); then
     MSG="Package version >= 2.1.14"
-  elif (echo "28f1694bb45236c5a70505d19b0f5135  /etc/auto.cvmfs" | md5sum --check --status); then
+  elif (echo "28f1694bb45236c5a70505d19b0f5134  /etc/auto.cvmfs" | md5sum --check --status); then
     MSG="found /etc/auto.cvmfs from cvmfs-2.1.14-1"
   fi
 fi
