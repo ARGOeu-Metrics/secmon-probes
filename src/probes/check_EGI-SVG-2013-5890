@@ -2,49 +2,46 @@
 
 # nagios check for cvmfs local root exploit
 
-PROBE_VERSION="v0.6"
+PROBE_VERSION="v0.7"
 
 NAGIOS_OK=0
 NAGIOS_WARNING=1
 NAGIOS_ERROR=2
 NAGIOS_UNKNOWN=3
 
+HASH2_0="639fa7fc467b67514671769dd1641d98"
+HASH2_1="28f1694bb45236c5a70505d19b0f5134"
+
 command -v cvmfs2 &>/dev/null
 if [ $? -ne 0 ]; then
    MSG="no cvmfs package found"
    echo "OK: $MSG"
    exit $NAGIOS_OK
-else
+fi
+
  VERSION=`echo "$(cvmfs2 -V 2>&1)" | sed -nre 's/[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p'`
  BRANCH=`echo "$(cvmfs2 -V 2>&1)" | sed -nre 's/[^0-9]+(([0-9]+\.){1}[0-9]+).*/\1/p'`
  BUILD=`echo $VERSION | sed -nre 's/([0-9]+\.)*//p'`
 
-if [ $BRANCH == 2.0 ]; then
-  if (( "$BUILD" >= "22" )); then
+if [ $BRANCH == 2.0 ] && (( "$BUILD" >= "22" )); then
     MSG="Package version >= 2.0.22"
-  elif (echo "639fa7fc467b67514671769dd1641d98  /etc/auto.cvmfs" | md5sum --check --status); then
-    MSG="found /etc/auto.cvmfs from cvmfs-2.0.22-1"
-  fi
-fi  
-
-if [ $BRANCH == 2.1 ]; then
-  if (( "$BUILD" >= "14" )); then
+elif [ $BRANCH == 2.1 ] && (( "$BUILD" >= "14" )); then
     MSG="Package version >= 2.1.14"
-  elif (echo "28f1694bb45236c5a70505d19b0f5134  /etc/auto.cvmfs" | md5sum --check --status); then
-    MSG="found /etc/auto.cvmfs from cvmfs-2.1.14-1"
-  fi
+else (echo "${HASH2_0}  /etc/auto.cvmfs" | md5sum --check --status) || 
+     (echo "${HASH2_1}  /etc/auto.cvmfs" | md5sum --check --status);
+    MSG="found valid hotfix"
 fi
 
 MD5SUM=$(md5sum /etc/auto.cvmfs)
 
 if [ -z "$MSG" ]; then
   echo "CRITICAL: ${VERSION} package found at `hostname` node  without hotfix"
-  echo "MD5 hash found $(md5sum /etc/auto.cvmfs)"
+  echo "MD5 hash found ${MD5SUM}"
   echo "probe version ${PROBE_VERSION}"
   exit $NAGIOS_ERROR
 else
-  echo "OK: $MSG [${PROBE_VERSION}]"
+  echo "OK: $MSG"
+  echo "probe version ${PROBE_VERSION}"
   exit $NAGIOS_OK
 fi
-fi   
 
