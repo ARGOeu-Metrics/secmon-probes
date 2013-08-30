@@ -2,7 +2,7 @@
 
 # nagios check for cvmfs local root exploit
 
-PROBE_VERSION="v1.0"
+PROBE_VERSION="v1.1"
 
 NAGIOS_OK=0
 NAGIOS_WARNING=1
@@ -32,9 +32,11 @@ else
     RC=$NAGIOS_OK
   else
     MSG="without hotfix"
+    RC=$NAGIOS_CRITICAL
   fi
   MSG="cvmfs version $VERSION found $MSG at $HOSTNAME"
-  MSG="$MSG\\nMD5 hash $(md5sum /etc/auto.cvmfs)"
+  MD5HASH=$(md5sum /etc/auto.cvmfs)
+  MSG="$MSG\\nMD5 hash $MD5HASH"
 fi
 
 case $RC in
