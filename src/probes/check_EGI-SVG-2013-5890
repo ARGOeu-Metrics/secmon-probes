@@ -35,8 +35,6 @@ else
     RC=$NAGIOS_CRITICAL
   fi
   MSG="cvmfs version $VERSION found $MSG at $HOSTNAME"
-  MD5HASH=$(md5sum /etc/auto.cvmfs)
-  MSG="$MSG\\nMD5 hash $MD5HASH"
 fi
 
 case $RC in
