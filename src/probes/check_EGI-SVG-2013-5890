@@ -2,7 +2,7 @@
 
 # nagios check for cvmfs local root exploit
 
-PROBE_VERSION="v1.3"
+PROBE_VERSION="v1.4"
 
 NAGIOS_OK=0
 NAGIOS_WARNING=1
@@ -38,10 +38,10 @@ else
 fi
 
 case $RC in
-  $NAGIOS_OK      ) echo -e "OK: $MSG";;
-  $NAGIOS_WARNING ) echo -e "WARNING: $MSG";;
-  $NAGIOS_ERROR   ) echo -e "ERROR: $MSG";;
-  $NAGIOS_UNKNOWN ) echo -e "UNKNOWN: $MSG";;
+  $NAGIOS_OK       ) echo -e "OK: $MSG";;
+  $NAGIOS_WARNING  ) echo -e "WARNING: $MSG";;
+  $NAGIOS_CRITICAL ) echo -e "CRITICAL: $MSG";;
+  $NAGIOS_UNKNOWN  ) echo -e "UNKNOWN: $MSG";;
 esac
 
 echo "probe version ${PROBE_VERSION}"
