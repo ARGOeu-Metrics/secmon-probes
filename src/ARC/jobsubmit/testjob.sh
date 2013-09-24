@@ -6,7 +6,7 @@ export SITE_NAME=`cat sitename 2> /dev/null`
 tar -zxf probes.tar.gz
 
 for probe in $probes; do
-  ./${probe} > ${probe}.msg
+  echo "$(hostname -f): $(./${probe})" > ${probe}.msg
   echo $? > ${probe}.res
 done
 
