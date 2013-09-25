@@ -2,7 +2,7 @@
 
 # nagios check for cvmfs local root exploit
 
-PROBE_VERSION="v1.5"
+PROBE_VERSION="v1.5.1"
 
 NAGIOS_OK=0
 NAGIOS_WARNING=1
@@ -12,10 +12,8 @@ NAGIOS_UNKNOWN=3
 HASH2_0="639fa7fc467b67514671769dd1641d98"
 HASH2_1="28f1694bb45236c5a70505d19b0f5134"
 
-NODE=$(hostname --fqdn)
-
 if !(command -v cvmfs2 &>/dev/null); then
-   MSG="no cvmfs found at $NODE"
+   MSG="no cvmfs found"
    RC=$NAGIOS_OK
 else
   CVMFS2V=$(cvmfs2 -V 2>&1)
@@ -36,7 +34,7 @@ else
     MSG="without hotfix"
     RC=$NAGIOS_CRITICAL
   fi
-  MSG="cvmfs version $VERSION found $MSG at $NODE"
+  MSG="cvmfs version $VERSION found $MSG"
 fi
 
 case $RC in
