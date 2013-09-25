@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.11
-Release: 15%{?dist}
+Release: 16%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -79,6 +79,9 @@ cd -
 %{dir}
 
 %changelog
+* Tue Sep 25 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-16
+- Fixed Torque probe
+
 * Tue Sep 25 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-15
 - Fixed ARC testjob script to report the probe return code
 
