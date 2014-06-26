@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.11
-Release: 16%{?dist}
+Release: 17%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -47,6 +47,8 @@ pattern libkeyutils.so* that doesn't belong to an installed RPM package
 - check for hosts with old vulnerable kernels
 * WN-check_EGI-SVG-2013-5890 
 - check for hosts with cvmfs local root exploit vulnerability
+* WN-Pakiti-Check 
+- Query pakiti portal and checks if the WN is in the vulnerable list
 %prep
 %setup -q
 
@@ -79,6 +81,9 @@ cd -
 %{dir}
 
 %changelog
+* Thu Jun 26 2014 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-17
+- Added Pakiti-Check probe
+
 * Tue Sep 25 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-16
 - Fixed Torque probe
 
