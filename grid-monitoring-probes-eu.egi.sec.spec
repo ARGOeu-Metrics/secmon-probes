@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.11
-Release: 19%{?dist}
+Release: 20%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -81,6 +81,9 @@ cd -
 %{dir}
 
 %changelog
+* Mon Aug 04 2014 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-20
+- Modified probe check_CVE-2013-2094 to only check for mitigations
+
 * Thu Jun 26 2014 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-19
 - Modified Pakiti-Check to not use nagios epn
 
