@@ -171,6 +171,7 @@ my $nodeFound;
 
 my $csv = Text::CSV->new();
 while (my $row = $csv->getline($fh)) {
+    next if ( $row->[0] !~ /EGI-Critical/ );
     if ( $row->[4] =~ /$nodename/ ) {
         $nodeFound = 1;
         $vulnPakiti->{lc($row->[7])} = 1;
@@ -199,4 +200,5 @@ if (@vulnUnresolved) {
     $plugin->nagios_exit(CRITICAL, "Found following unresolved vulnerabilities in Pakiti: ".join(', ',@vulnUnresolved));
 }
 $plugin->nagios_exit(OK, "All vulnerabilities in Pakiti patched");
+
 
