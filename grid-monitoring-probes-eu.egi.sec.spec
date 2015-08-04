@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.11
-Release: 25%{?dist}
+Release: 26%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -49,6 +49,8 @@ pattern libkeyutils.so* that doesn't belong to an installed RPM package
 - check for hosts with cvmfs local root exploit vulnerability
 * Pakiti-Check 
 - Query pakiti portal and checks if a WN is in the vulnerable list
+* WN-check_CVE-2015-3245 
+- Check if mitigation for CVE-2015-3245 has been applied
 %prep
 %setup -q
 
@@ -81,6 +83,9 @@ cd -
 %{dir}
 
 %changelog
+* Tue Aug 04 2015 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-26
+- Added check for CVE-2015-3245
+
 * Mon May 18 2015 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-25
 - Fixed bug in Pakiti-check vulnerabilities probe
 
