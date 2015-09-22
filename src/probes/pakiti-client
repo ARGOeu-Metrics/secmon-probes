@@ -243,7 +243,7 @@ if [ ${IS_PROXY} -eq 1 ]; then
   done
 else
   # Getting system parameters
-  REPHOST=`hostname -f`
+  REPHOST=`hostname`
   KERNEL=`uname -r`
   ARCH=`uname -m`
   PKGS=""

@@ -82,6 +82,11 @@ $plugin->add_arg(
     required => 0,
     default => '/etc/grid-security/hostkey.pem'
 );
+$plugin->add_arg(
+    spec => 'site=s',
+    help => "--site=sitename\n   GOCDB sitename.\n",
+    required => 1,
+);
 
 $plugin->getopts;
 
@@ -150,16 +155,17 @@ if ($plugin->opts->verbose) {
 $ENV{HTTPS_KEY_FILE} = $plugin->opts->key;
 $ENV{HTTPS_CERT_FILE} = $plugin->opts->cert;
 $ENV{HTTPS_CA_DIR} = '/etc/grid-security/certificates';
+my $url = $plugin->opts->url . '&site=' . $plugin->opts->site;
 
 if ($plugin->opts->verbose) {
-    print "Fetching data from Pakiti URL: ".$plugin->opts->url."\n";
+    print "Fetching data from Pakiti URL: $url\n";
 }
 
 my $ua = LWP::UserAgent->new(env_proxy=>1);
-my $req = HTTP::Request->new(GET => $plugin->opts->url);
+my $req = HTTP::Request->new(GET => $url);
 my $res = $ua->request($req);
 if (!$res->is_success) {
-    $plugin->nagios_die("Could not get content of Pakiti web page '".$plugin->opts->url."': ".$res->status_line);
+    $plugin->nagios_die("Could not get content of Pakiti web page '$url': ".$res->status_line);
 }
 
 my $response = $res->content;
@@ -200,5 +206,4 @@ if (@vulnUnresolved) {
     $plugin->nagios_exit(CRITICAL, "Found following unresolved vulnerabilities in Pakiti: ".join(', ',@vulnUnresolved));
 }
 $plugin->nagios_exit(OK, "All vulnerabilities in Pakiti patched");
-
 
