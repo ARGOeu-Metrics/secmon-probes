@@ -8,7 +8,7 @@ tar -zxf probes.tar.gz
 for probe in $probes; do
   ./${probe} > ${probe}.msg
   echo $? > ${probe}.res
-  sed -i -e "1 s/^/$(hostname -f): /" ${probe}.msg
+  sed -i -e "1 s/^/$(hostname): /" ${probe}.msg
 done
 
 exit 0
