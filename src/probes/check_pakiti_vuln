@@ -89,18 +89,19 @@ $plugin->add_arg(
 );
 
 $plugin->getopts;
+my $nodename = '';
 
 # Signal handler - TERM
 local $SIG{ALRM} = sub {
     local $SIG{TERM} = 'IGNORE';
     kill TERM => -$$;
-    $plugin->nagios_die("Timeout occured.");
+    $plugin->nagios_die("$nodename: Timeout occured.");
 };
 
 local $SIG{TERM} = sub {
     local $SIG{TERM} = 'IGNORE';
     kill TERM => -$$;
-    $plugin->nagios_die("Plugin received TERM signal.");
+    $plugin->nagios_die("$nodename: Plugin received TERM signal.");
 };
 
 # Input params validation
@@ -108,20 +109,19 @@ local $SIG{TERM} = sub {
 alarm($plugin->opts->timeout);
 
 my $vo = $plugin->opts->vo;
-my $nagios = GridMon::Nagios->new();
 my $hostname = $plugin->opts->hostname;
-my $nodename;
+my $nagios = GridMon::Nagios->new();
 my $pakiti_output = '';
 my $vulnNagios = {};
 my $hostFound;
 
 my $statusHostAttrs = [];
-$nagios->fetchStatusHostData($statusHostAttrs) or die $nagios->{ERROR};
+$nagios->fetchStatusHostData($statusHostAttrs) or $plugin->nagios_die($nagios->{ERROR});
 my $statusServiceAttrs = ["current_state","plugin_output","last_check"];
-$nagios->fetchStatusServiceData($statusServiceAttrs) or die $nagios->{ERROR};
+$nagios->fetchStatusServiceData($statusServiceAttrs) or $plugin->nagios_die($nagios->{ERROR});
 my $hostFilter = {};
 $hostFilter->{host_name} = $hostname;
-$nagios->filterHosts($hostFilter) or die $nagios->{ERROR};
+$nagios->filterHosts($hostFilter) or $plugin->nagios_die($nagios->{ERROR});
 foreach my $host (keys %{$nagios->{HOSTS}}) {
     $hostFound = 1;
     my $hostServices = $nagios->{HOSTS}->{$host}->{services};
@@ -138,10 +138,10 @@ foreach my $host (keys %{$nagios->{HOSTS}}) {
 }
 
 if (!$hostFound) {
-    $plugin->nagios_die("Host $hostname not found in the Nagios configuration.");
+    $plugin->nagios_die("$nodename: Host $hostname not found in the Nagios configuration.");
 }
 if (!$nodename) {
-    $plugin->nagios_die("Could not extract node name from Nagios test eu.egi.sec.WN-Pakiti-$vo output: $pakiti_output");
+    $plugin->nagios_die("$nodename: Could not extract node name from Nagios test eu.egi.sec.WN-Pakiti-$vo output: $pakiti_output");
 }
 
 if ($plugin->opts->verbose) {
@@ -165,11 +165,11 @@ my $ua = LWP::UserAgent->new(env_proxy=>1);
 my $req = HTTP::Request->new(GET => $url);
 my $res = $ua->request($req);
 if (!$res->is_success) {
-    $plugin->nagios_die("Could not get content of Pakiti web page '$url': ".$res->status_line);
+    $plugin->nagios_die("$nodename: Could not get content of Pakiti web page '$url': ".$res->status_line);
 }
 
 my $response = $res->content;
-open my $fh, '<', \$response or $plugin->nagios_die("Failed passing HTTP response to file handle: $!");
+open my $fh, '<', \$response or $plugin->nagios_die("$nodename: Failed passing HTTP response to file handle: $!");
 
 my $vulnPakiti = {};
 my @vulnUnresolved = ();
@@ -187,7 +187,7 @@ while (my $row = $csv->getline($fh)) {
 alarm(0);
 
 if (!$nodeFound) {
-    $plugin->nagios_exit(OK, "No vulnerabilities found in Pakiti.");
+    $plugin->nagios_exit(OK, "$nodename: No vulnerabilities found in Pakiti.");
 }
 
 if ($plugin->opts->verbose) {
@@ -203,7 +203,7 @@ foreach my $vuln (sort keys %{$vulnPakiti}) {
 }
 
 if (@vulnUnresolved) {
-    $plugin->nagios_exit(CRITICAL, "Found following unresolved vulnerabilities in Pakiti: ".join(', ',@vulnUnresolved));
+    $plugin->nagios_exit(CRITICAL, "$nodename: Found following unresolved vulnerabilities in Pakiti: ".join(', ',@vulnUnresolved));
 }
-$plugin->nagios_exit(OK, "All vulnerabilities in Pakiti patched");
+$plugin->nagios_exit(OK, "$nodename: Critical vulnerabilities found but mitigated by configuration.");
 
