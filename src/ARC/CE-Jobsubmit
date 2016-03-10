@@ -85,8 +85,8 @@ jobdir=/var/lib/gridprobes/$VO/eu.egi.sec/ARCCE/$hostname/$testname
 mkdir -p $jobdir
 
 if [ -r $jobdir/jobid ] ; then
-    ngstat -l -i $jobdir/jobid -t $timeout > $jobdir/status 2>&1
-    jobstatus=`grep "^  Status:" $jobdir/status | sed -e "s/  Status:\s*//"`
+    arcstat -l -i $jobdir/jobid -t $timeout > $jobdir/status 2>&1
+    jobstatus=`grep "^ Specific state:" $jobdir/status | sed -e "s/ Specific state:\s*//"`
 
     case "$jobstatus" in
 	"")
@@ -94,21 +94,21 @@ if [ -r $jobdir/jobid ] ; then
 	    res=$STATE_WARNING
 	    ;;
 	"DELETED")
-	    ngclean -i $jobdir/jobid -t $timeout > /dev/null 2>&1
+	    arcclean -i $jobdir/jobid -t $timeout > /dev/null 2>&1
 	    rm -f $jobdir/jobid
 	    msg="Job deleted"
 	    res=$STATE_WARNING
 	    ;;
 	"FAILED")
 	    rm -rf $jobdir/$testname
-	    ngget -i $jobdir/jobid -t $timeout -dir $jobdir -j > /dev/null 2>&1
+	    arcget -i $jobdir/jobid -t $timeout -dir $jobdir -J > /dev/null 2>&1
 	    rm -f $jobdir/jobid
 	    msg="Job failed"
 	    res=$STATE_CRITICAL
 	    ;;
 	"FINISHED")
 	    rm -rf $jobdir/$testname
-	    ngget -i $jobdir/jobid -t $timeout -dir $jobdir -j > /dev/null 2>&1
+	    arcget -i $jobdir/jobid -t $timeout -dir $jobdir -J > /dev/null 2>&1
 
 	    for test in `cat $confdir/test_list`; do
 		tres=`cat $jobdir/$testname/$test.res`
@@ -130,8 +130,8 @@ if [ -r $jobdir/jobid ] ; then
     if [ -r $jobdir/jobid ] ; then
 	age=$(( `date +%s` - `stat -c %Y $jobdir/jobid` ))
 	if [ $age -gt 43200 ] ; then # 12 hours
-	    ngkill -i $jobdir/jobid -t $timeout > /dev/null 2>&1
-	    ngclean -i $jobdir/jobid -t $timeout > /dev/null 2>&1
+	    arckill -i $jobdir/jobid -t $timeout > /dev/null 2>&1
+	    arcclean -i $jobdir/jobid -t $timeout > /dev/null 2>&1
 	    rm -f $jobdir/jobid
 	    msg="Job not completed within 12 hours"
 	    res=$STATE_WARNING
@@ -142,7 +142,7 @@ fi
 if [ ! -r $jobdir/jobid ] ; then
     echo $NAGIOS__HOSTSITE_NAME > $jobdir/sitename
     cat $confdir/xrsl | sed -e "s#sitename_loc#$jobdir/sitename#g" > $jobdir/xrsl
-    ngsub -c $hostname -o $jobdir/jobid -t $timeout $jobdir/xrsl > $jobdir/log 2>&1
+    arcsub -c $hostname -o $jobdir/jobid -t $timeout $jobdir/xrsl > $jobdir/log 2>&1
     if [ ! -r $jobdir/jobid ] ; then
 	msg="Job submission failed"
 	res=$STATE_CRITICAL

@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.11
-Release: 29%{?dist}
+Release: 30%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -83,6 +83,9 @@ cd -
 %{dir}
 
 %changelog
+* Thu Mar 10 2016 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-30
+- Update ARC-CE submission script to use the new arc client commands
+
 * Mon Nov 02 2015 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-29
 - Add "hostname" of the node on the output of check_pakiti_vuln probe
 
