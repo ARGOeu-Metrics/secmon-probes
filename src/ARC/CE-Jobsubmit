@@ -84,7 +84,7 @@ mkdir -p $jobdir
 if [ -r $jobdir/jobid ] ; then
     arcstat -l -i $jobdir/jobid -t $timeout > $jobdir/status 2>&1
     jobstatus=`grep "^ Specific state:" $jobdir/status | sed -e "s/ Specific state:\s*//"`
-
+    joberror=`grep "^ Job Error:" $jobdir/status | sed -e "s/ Job Error:\s*//"`
     case "$jobstatus" in
 	"")
 	    msg="Job state not available"
@@ -93,14 +93,14 @@ if [ -r $jobdir/jobid ] ; then
 	"DELETED")
 	    arcclean -i $jobdir/jobid -t $timeout > /dev/null 2>&1
 	    rm -f $jobdir/jobid
-	    msg="Job deleted"
-	    res=$STATE_WARNING
+            echo "Job deleted from LRMS"
+	    exit $STATE_WARNING
 	    ;;
 	"FAILED")
 	    rm -rf $jobdir/$testname
 	    rm -f $jobdir/jobid
-	    msg="Job failed"
-	    res=$STATE_CRITICAL
+	    echo $joberror
+	    exit $STATE_CRITICAL
 	    ;;
 	"FINISHED")
 	    rm -rf $jobdir/$testname

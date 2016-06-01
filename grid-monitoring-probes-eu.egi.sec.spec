@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.11
-Release: 31%{?dist}
+Release: 32%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -83,6 +83,9 @@ cd -
 %{dir}
 
 %changelog
+* Wed Jun 01 2016 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-32
+- Modified ARC-CE submission script to exit in case of job failure
+
 * Wed Jun 01 2016 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-31
 - Removed unused commands from ARC-CE submission script
 
