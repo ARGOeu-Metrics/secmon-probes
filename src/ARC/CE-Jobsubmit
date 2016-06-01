@@ -63,9 +63,6 @@ while test $# != 0 ; do
 	    shift
 	    payload=$1
 	    ;;
-	-v|--verbose)
-	    shift
-	    ;;
 	*)
 	    echo Unknown option "$1"
 	    exit $STATE_UNKNOWN
@@ -101,7 +98,6 @@ if [ -r $jobdir/jobid ] ; then
 	    ;;
 	"FAILED")
 	    rm -rf $jobdir/$testname
-	    arcget -i $jobdir/jobid -t $timeout -dir $jobdir -J > /dev/null 2>&1
 	    rm -f $jobdir/jobid
 	    msg="Job failed"
 	    res=$STATE_CRITICAL
