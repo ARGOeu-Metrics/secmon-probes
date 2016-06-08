@@ -92,8 +92,9 @@ if [ -r $jobdir/jobid ] ; then
                 msg="Job state not available"
                 res=$STATE_WARNING
             else
-                msg=$joblog
-                res=$STATE_CRITICAL
+                rm -f $jobdir/jobid
+                echo $joblog
+                exit $STATE_CRITICAL
             fi
 	    ;;
 	"DELETED")
