@@ -85,13 +85,17 @@ if [ -r $jobdir/jobid ] ; then
     arcstat -l -i $jobdir/jobid -t $timeout > $jobdir/status 2>&1
     jobstatus=`grep "^ Specific state:" $jobdir/status | sed -e "s/ Specific state:\s*//"`
     joberror=`grep "^ Job Error:" $jobdir/status | sed -e "s/ Job Error:\s*//"`
+    jobwarn=`grep "^WARNING" $jobdir/status`
     joblog=`grep "^ERROR" $jobdir/log`
     case "$jobstatus" in
 	"")
-            if [ -z "$joblog" ] ; then
-                msg="Job state not available"
+            if [ -n "$jobwarn" ] ; then
+                msg=$jobwarn
                 res=$STATE_WARNING
             else
+                msg="Job state not available"
+            fi
+            if [ -n "$joblog" ] ; then
                 rm -f $jobdir/jobid
                 echo $joblog
                 exit $STATE_CRITICAL
