@@ -88,7 +88,6 @@ if [ -r $jobdir/jobid ] ; then
     joblog=`grep "^ERROR" $jobdir/log`
     case "$jobstatus" in
 	"")
-	    msg="Job state not available"
             if [ -z "$joblog" ] ; then
                 msg="Job state not available"
                 res=$STATE_WARNING
