@@ -30,7 +30,7 @@ payload=org.ndgf
 while test $# != 0 ; do
     case "$1" in
 	-V|--version)
-	    print_revision ARCCE-$testname 0.2
+	    print_revision ARCCE-$testname 0.4
 	    exit $STATE_OK
 	    ;;
 	-h|--help)
@@ -86,90 +86,65 @@ if [ -r $jobdir/jobid ] ; then
     jobstatus=`grep "^ Specific state:" $jobdir/status | sed -e "s/ Specific state:\s*//"`
     joberror=`grep "^ Job Error:" $jobdir/status | sed -e "s/ Job Error:\s*//"`
     jobwarn=`grep "^WARNING" $jobdir/status`
-    joblog=`grep "^ERROR" $jobdir/log`
-    joblogfull=`cat $jobdir/log`
     #Get rid of stale jobs
     jobstale=`grep '^Warning: Job not found in job list' $jobdir/status`
-    if [ -s $jobdir/jobid ] ; then
-        if [ -n "$jobstale" ] ; then
-            rm -f $jobdir/jobid
-            rm -f $jobdir/status
-            msg="Found stale jobid. Removing it..."
-        else
-            case "$jobstatus" in
-                "")
-                    msg="Job state not available"
-                    res=$STATE_WARNING
-                    if [ -n "$jobwarn" ] ; then
-                        msg+='\n'$jobwarn'\n'
-                    fi
-                    if [ -n "$joblog" ] ; then
-                        rm -f $jobdir/jobid
-                        rm -f $jobdir/log
-                        echo $joblog
-                        exit $STATE_CRITICAL
-                    fi
-                    ;;
-                "DELETED")
-                    arcclean -i $jobdir/jobid -t $timeout > /dev/null 2>&1
-                    rm -f $jobdir/jobid
-                    rm -f $jobdir/status
-                    echo "Job deleted from LRMS"
-                    exit $STATE_WARNING
-                    ;;
-                "FAILED")
-                    rm -rf $jobdir/$testname
-                    rm -f $jobdir/jobid
-                    rm -f $jobdir/status
-                    echo $joberror
-                    exit $STATE_CRITICAL
-                    ;;
-                "FINISHED")
-                    rm -rf $jobdir/$testname
-                    arcget -i $jobdir/jobid -t $timeout -dir $jobdir -J > /dev/null 2>&1
-    
-                    for test in `cat $confdir/test_list`; do
-                        if [ -s $jobdir/$testname/$test.res ] && [ -s $jobdir/$testname/$test.msg ] ; then
-                  	    tres=`cat $jobdir/$testname/$test.res`
-                	    tmsg=`cat $jobdir/$testname/$test.msg|sed -e "1s/$/|/g"|sed ':a;N;$!ba;s/\n/\\\n/g'`
-                	    time=`date +%s`
-                	    echo "[$time] PROCESS_SERVICE_CHECK_RESULT;$hostname;eu.egi.sec.WN-$test-$VO;$tres;$tmsg" > $NAGIOS_CMD
-                        else
-                            time=`date +%s`
-                            echo "[$time] PROCESS_SERVICE_CHECK_RESULT;$hostname;eu.egi.sec.WN-$test-$VO;3;(No output returned from plugin)" > $NAGIOS_CMD
-                        fi
-                    done
-    
-                    rm -f $jobdir/jobid
-                    rm -f $jobdir/status
-                    msg="Job finished successfully"
-                    res=$STATE_OK
-                    ;;
-                *)
-                    msg="Job not finsihed yet: $jobstatus"
-                    res=$STATE_OK
-                    ;;
-            esac
-        fi
-
-        if [ -r $jobdir/jobid ] ; then
-            age=$(( `date +%s` - `stat -c %Y $jobdir/jobid` ))
-      	        if [ $age -gt 21200 ] ; then # 6 hours
-      	            arckill -i $jobdir/jobid -t $timeout > /dev/null 2>&1
-      	            arcclean -i $jobdir/jobid -t $timeout > /dev/null 2>&1
-      	            rm -f $jobdir/jobid
-      	            rm -f $jobdir/status
-                    expjob=1
-                    msg+='\nJob not completed within 6 hours\n'
-               fi
-        fi
+    if [ -n "$jobstale" ] ; then
+         rm -f $jobdir/jobid $jobdir/status
+         msg='Found stale jobid. Removing it...\n'
     else
-        rm -f $jobdir/jobid
-        if [ -n "joblog" ] ; then
-            msg='There was an error submitting the job\n-----\nJob log:\n\n'"$joblogfull"'\n\nRemoving empty jobid file. Trying to resubmit...\n'
-        else
-            msg='Submission did not return any jobid. Trying to resubmit...\n'
-        fi
+        case "$jobstatus" in
+            "")
+                  msg='Job state not available\n'"$jobwarn"
+                  res=$STATE_WARNING
+                  ;;
+              "DELETED")
+                  arcclean -i $jobdir/jobid -t $timeout > /dev/null 2>&1
+                  echo 'Job: '`cat $jobdir/jobid`' deleted from LRMS'
+                  rm -f $jobdir/jobid $jobdir/status
+                  exit $STATE_WARNING
+                  ;;
+              "FAILED")
+                  rm -rf $jobdir/$testname
+                  rm -f $jobdir/jobid $jobdir/status
+                  echo $joberror
+                  exit $STATE_CRITICAL
+                  ;;
+              "FINISHED")
+                  rm -rf $jobdir/$testname
+                  arcget -i $jobdir/jobid -t $timeout -dir $jobdir -J > /dev/null 2>&1
+    
+                  for test in `cat $confdir/test_list`; do
+                      if [ -s $jobdir/$testname/$test.res ] && [ -s $jobdir/$testname/$test.msg ] ; then
+               	          tres=`cat $jobdir/$testname/$test.res`
+                	  tmsg=`cat $jobdir/$testname/$test.msg|sed -e "1s/$/|/g"|sed ':a;N;$!ba;s/\n/\\\n/g'`
+                	  time=`date +%s`
+                	  echo "[$time] PROCESS_SERVICE_CHECK_RESULT;$hostname;eu.egi.sec.WN-$test-$VO;$tres;$tmsg" > $NAGIOS_CMD
+                      else
+                          time=`date +%s`
+                          echo "[$time] PROCESS_SERVICE_CHECK_RESULT;$hostname;eu.egi.sec.WN-$test-$VO;3;(No output returned from plugin)" > $NAGIOS_CMD
+                      fi
+                  done
+    
+                  echo 'Job: '`cat $jobdir/jobid`'\nStatus: '$jobstatus' Results have been retrieved'
+                  rm -f $jobdir/jobid $jobdir/status
+                  exit $STATE_OK
+                  ;;
+               *)
+                  msg="Job not finsihed yet: $jobstatus"
+                  res=$STATE_OK
+                  ;;
+        esac
+    fi
+
+    if [ -r $jobdir/jobid ] ; then
+        age=$(( `date +%s` - `stat -c %Y $jobdir/jobid` ))
+           if [ $age -gt 21200 ] ; then # 6 hours
+               arckill -i $jobdir/jobid -t $timeout > /dev/null 2>&1
+               arcclean -i $jobdir/jobid -t $timeout > /dev/null 2>&1
+               expjob=1
+               msg+='\nJob: '`cat $jobdir/jobid`'\n not completed within 6 hours\n'
+               rm -f $jobdir/jobid $jobdir/status
+           fi
     fi
 fi
 
@@ -177,16 +152,19 @@ if [ ! -r $jobdir/jobid ] ; then
     echo $NAGIOS__HOSTSITE_NAME > $jobdir/sitename
     cat $confdir/xrsl | sed -e "s#sitename_loc#$jobdir/sitename#g" > $jobdir/xrsl
     arcsub -c $hostname -o $jobdir/jobid -t $timeout $jobdir/xrsl > $jobdir/log 2>&1
-    msg+='\nSubmitting new job...\n'
+    joblog=`grep "^ERROR" $jobdir/log`
+    joblogfull=`cat $jobdir/log`
+    msg+='Submitting job: '`cat $jobdir/jobid`'\n'
     res=$STATE_OK
     if [ -n "$expjob" ] && [ -r $jobdir/jobid ] ; then
         res=$STATE_WARNING
     fi
     if [ ! -s $jobdir/jobid ] ; then
-	msg+='\nJob submission failed. Submission did not return any jobid. \n'
+        msg='There was an error submitting the job\n-----\nJob log:\n\n'"$joblogfull"
+        rm -f $jobdir/jobid
 	res=$STATE_CRITICAL
     else
-	msg+='\nJob submission successful\n'
+	msg+='Job submission successful'
     fi
 fi
 
