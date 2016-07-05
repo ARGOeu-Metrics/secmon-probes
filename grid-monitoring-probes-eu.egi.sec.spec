@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.11
-Release: 38%{?dist}
+Release: 39%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -83,6 +83,9 @@ cd -
 %{dir}
 
 %changelog
+* Tue Jul 05 2016 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-39
+- ARC wrapper: Remove dependencies to org.ndgf
+
 * Fri Jun 10 2016 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-38
 - ARC wrapper: handle finished state as terminal
 - ARC wrapper: added job ids in output messages
