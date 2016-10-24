@@ -1,0 +1,19 @@
+#!/bin/bash
+
+NAGIOS_OK=0
+NAGIOS_ERROR=2
+
+lsmod | grep -q cve_2016_5195
+if [ $? -eq 0 ]; then
+	echo "CERN module detected (supposedly with systemtap mitigations)"
+	exit $NAGIOS_OK
+fi
+
+lsmod | grep -q nomadvise
+if [ $? -eq 0 ]; then
+	echo "CESNET module detected (supposedly blocking madvise(2))"
+	exit $NAGIOS_OK
+fi
+
+echo "No known mitigation of CVE-2016-5195 detected"
+exit $NAGIOS_ERROR
