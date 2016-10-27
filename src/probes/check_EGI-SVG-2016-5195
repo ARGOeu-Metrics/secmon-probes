@@ -15,5 +15,11 @@ if [ $? -eq 0 ]; then
 	exit $NAGIOS_OK
 fi
 
+lsmod | grep -q '^m '
+if [ $? -eq 0 ]; then
+	echo "CESNET module detected (supposedly blocking madvise(2))"
+	exit $NAGIOS_OK
+fi
+
 echo "No known mitigation of CVE-2016-5195 detected"
 exit $NAGIOS_ERROR
