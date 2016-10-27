@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.11
-Release: 39%{?dist}
+Release: 40%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -45,12 +45,14 @@ Additionally it contains the following Nagios probes:
 pattern libkeyutils.so* that doesn't belong to an installed RPM package
 * WN-check_CVE-2013-2094 
 - check for hosts with old vulnerable kernels
-* WN-check_EGI-SVG-2013-5890 
-- check for hosts with cvmfs local root exploit vulnerability
 * Pakiti-Check 
 - Query pakiti portal and checks if a WN is in the vulnerable list
 * WN-check_CVE-2015-3245 
 - Check if mitigation for CVE-2015-3245 has been applied
+* WN-check_CVE-2016-5195
+- Check if mitigation for CVE-2016-5195 has been applied
+* WN-check_EGI-SVG-2016-5195
+- Check if mitigation for EGI-SVG-2016-5195 has been applied
 %prep
 %setup -q
 
@@ -83,6 +85,10 @@ cd -
 %{dir}
 
 %changelog
+* Mon Oct 24 2016 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 1.0.11-40
+- Removed probe eu.egi.sec.WN-check_EGI-SVG-2013-5890-ops from ARC and CREAM tests
+- Added probes for CVE-2016-5195, EGI-SVG-2016-5195
+
 * Tue Jul 05 2016 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-39
 - ARC wrapper: Remove dependencies to org.ndgf
 
