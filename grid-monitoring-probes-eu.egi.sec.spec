@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.11
-Release: 40%{?dist}
+Release: 41%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -85,6 +85,9 @@ cd -
 %{dir}
 
 %changelog
+* Tue Nov 22 2016 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 1.0.11-41
+- CVE-2016-5195, EGI-SVG-2016-5195: Added detection of a generic stap module
+
 * Mon Oct 24 2016 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 1.0.11-40
 - Removed probe eu.egi.sec.WN-check_EGI-SVG-2013-5890-ops from ARC and CREAM tests
 - Added probes for CVE-2016-5195, EGI-SVG-2016-5195
