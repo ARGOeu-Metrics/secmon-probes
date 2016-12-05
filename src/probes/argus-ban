@@ -1,0 +1,176 @@
+#!/usr/bin/env python
+
+# feature print_function of future module is not available on python 2.4 
+#from __future__ import print_function
+#
+
+import argparse
+from lxml import etree
+from datetime import datetime
+import hashlib
+from httplib import HTTPSConnection
+import re
+from socket import setdefaulttimeout
+import suds
+from suds.client import Client
+from suds.plugin import MessagePlugin
+from suds.transport.http import HttpTransport
+import sys
+import urllib2
+from urllib2 import build_opener, HTTPSHandler, URLError
+
+REGEX = r'CN=(?P<hash>[0-9a-f]{8}), CN=(?P<date>[0-9]{8}), CN=Test Subject, CN=000001, CN=tsubject, OU=Users, OU=Organic Units, DC=cern, DC=ch'
+XML_NS = {
+  'soapenv': 'http://schemas.xmlsoap.org/soap/envelope/',
+  'pap': 'http://services.pap.authz.glite.org',
+  'xacml': 'urn:oasis:names:tc:xacml:2.0:policy:schema:os',
+}
+XPATH_LISTPOLICIES = '/soapenv:Envelope/soapenv:Body/pap:listPoliciesResponse/pap:listPoliciesReturn/xacml:Policy/xacml:Rule/xacml:Target/xacml:Subjects/xacml:Subject/xacml:SubjectMatch/xacml:AttributeValue'
+XPATH_GETALLPAPS = '/soapenv:Envelope/soapenv:Body/pap:getAllPapsResponse/pap:getAllPapsReturn/pap:getAllPapsReturn/pap:alias'
+
+PROBE_VERSION="v2.0"
+
+NAGIOS_OK=0
+NAGIOS_WARNING=1
+NAGIOS_CRITICAL=2
+NAGIOS_UNKNOWN=3
+
+class MyHTTPSHandler(HTTPSHandler):
+    def __init__(self, key, cert):
+        HTTPSHandler.__init__(self)
+        self.key = key
+        self.cert = cert
+
+    def https_open(self, req):
+        return self.do_open(self.getConnection, req)
+
+    def getConnection(self, host, timeout=300):
+        return HTTPSConnection(host, key_file=self.key, cert_file=self.cert)
+
+
+class MyHTTPSTransport(HttpTransport):
+    def __init__(self, key, cert, *args, **kwargs):
+        HttpTransport.__init__(self, *args, **kwargs)
+        self.key = key
+        self.cert = cert
+
+    def u2open(self, u2request):
+        timeout = self.options.timeout
+        url = build_opener(MyHTTPSHandler(self.key, self.cert))
+        if self.u2ver() < 2.6:
+            setdefaulttimeout(timeout)
+            return url.open(u2request)
+        else:
+            return url.open(u2request, timeout=timeout)
+
+
+def validate_DN(dn, salt):
+    data = re.match(REGEX, dn)
+    if data is None:
+        return
+    sha = hashlib.new('sha256')
+    sha.update(salt)
+    sha.update(data.group('date'))
+    sig = sha.hexdigest()
+    if sig[0:8] == data.group('hash'):
+        return data.group('date')
+
+
+class ListPoliciesFilter(MessagePlugin):
+    def __init__(self, salt, result, raw=False, all_raw=False):
+        self._salt = salt
+        self._result = result
+        self._raw = raw or all_raw
+        self._all_raw = all_raw
+
+    def received(self, context):
+        text = context.reply
+        context.reply = ''
+        root = etree.XML(text)
+        for node in root.xpath(XPATH_LISTPOLICIES, namespaces=XML_NS):
+            if node.attrib['DataType'] == 'urn:oasis:names:tc:xacml:1.0:data-type:x500Name':
+                res = validate_DN(node.text, self._salt)
+                if res is not None:
+                    self._result.add(res)
+                    if self._raw:
+                        print >> sys.stderr, node.text
+                elif self._all_raw:
+                    print >> sys.stderr, node.text
+
+
+class GetAllPapsFilter(MessagePlugin):
+    def __init__(self, result):
+        self._result = result
+
+    def received(self, context):
+        text = context.reply
+        context.reply = ''
+        root = etree.XML(text)
+        for node in root.xpath(XPATH_GETALLPAPS, namespaces=XML_NS):
+            self._result.add(node.text)
+
+
+def get_dyn_dn_dates(server, cert, key, salt, raw=False, all_raw=False):
+    aliases = set()
+    client = Client('https://%s:8150/pap/services/PAPManagementService?wsdl' % (server),
+                    transport = MyHTTPSTransport(key, cert),
+                    plugins=[GetAllPapsFilter(aliases)])
+    client.service.getAllPaps()
+    res = set()
+    client = Client('https://%s:8150/pap/services/XACMLPolicyManagementService?wsdl' % (server),
+                    transport = MyHTTPSTransport(key, cert),
+                    plugins=[ListPoliciesFilter(salt, res, raw=raw, all_raw=all_raw)])
+    for alias in aliases:
+        client.service.listPolicies(alias)
+    return res
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Extract and verify daily dynamic DNs from Argus')
+    parser.add_argument('--cert', required=True, help='Certificate used for the connection')
+    parser.add_argument('--key', required=True, help='Private key used for the connection')
+    parser.add_argument('--salt', required=True, help='Salt for the dyn dn')
+    parser.add_argument('-H', help='Server to connect to', default='lcg-argus.cern.ch')
+    parser.add_argument('--valid', help='Valid dates', action='append')
+    parser.add_argument('--today', help='Check only for today', action='store_true')
+    parser.add_argument('--raw', help='Get dynamic DNs on stderr', action='store_true')
+    parser.add_argument('--all-raw', help='Get all DNs on stderr', action='store_true', dest='all_raw')
+    return parser.parse_args()
+
+
+def main(args):
+    try:
+        dns = get_dyn_dn_dates(args.H, args.cert, args.key, args.salt, raw=args.raw, all_raw=args.all_raw)
+    except urllib2.URLError, e:
+        print 'connection error %s ' % e.args
+        return NAGIOS_WARNING
+    except suds.WebFault, e:
+        print 'Authorization error %s ' % e.args
+        return NAGIOS_WARNING
+    if args.valid is None and not args.today:
+        for dn in dns:
+            print(dn)
+        return NAGIOS_OK
+    if args.today:
+        today = datetime.now().strftime("%Y%m%d")
+        if today in dns:
+            print 'Found banned DN'
+            return NAGIOS_OK
+        else:
+            print 'No banned DN found!'
+            return NAGIOS_CRITICAL
+    elif args.valid:
+        for valid in args.valid:
+            if valid in dns:
+                print 'There is a banned DN for date %s' % valid
+                return NAGIOS_OK
+    else:
+        return NAGIOS_CRITICAL
+    return NAGIOS_CRITICAL
+
+
+if __name__ == '__main__':
+    sys.exit(main(parse_args()))
+
+
+
