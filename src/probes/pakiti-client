@@ -2,7 +2,7 @@
 
 # Default values
 CONF=''
-SERVERS="pakiti.egi.eu:443 took8.ics.muni.cz:4433"
+SERVERS="pakiti.egi.eu:443 pakiti.cesnet.cz:443/egi"
 SERVER_URL="/feed/"
 METHOD="autodetect"
 OPENSSL_BIN=`which openssl 2>/dev/null`
@@ -365,15 +365,22 @@ for SERVER in $SERVERS; do
 		# Kernel can obtain + char, so replace it with %2b
 		KERNEL=`uname -r | sed -e 's/\+/%2b/g'`
 
-		# Format of the SERVER variable is hostname:port
-		OPENSSL="${OPENSSL} -connect ${SERVER}"
-		
+		# Format of the SERVER variable is hostname:port[/path].
+		# The optional /path is ommited on the next line.
+		OPENSSL="${OPENSSL} -connect ${SERVER%%/*}"
+
+		# Use the path if it is included in the server specification. Otherwise keep the global value.
+		URL_PATH=${SERVER_URL}
+		if [[ "$SERVER" == *\/* ]]; then
+			URL_PATH=/${SERVER#*/}${SERVER_URL}
+		fi
+
 		POST_DATA="type=${TYPE}&host=${REPHOST}&os=${OS}&arch=${ARCH}&tag=${TAG}&kernel=${KERNEL}&version=${PROTOCOL_VERSION}&report=${REPORT}&proxy=${IS_PROXY}&site=${SITE}&pkgs="
 		POST_DATA_SIZE=`echo -n ${POST_DATA} | wc -m`
 		FILE_SIZE=`cat ${TMPFILE} | wc -c`
 		let POST_DATA_SIZE=${POST_DATA_SIZE}+${FILE_SIZE}-1
 	
-		POST_HTTP_HEADER="POST ${SERVER_URL} HTTP/1.0\nContent-Type: application/x-www-form-urlencoded\nContent-Length: ${POST_DATA_SIZE}\n\n"
+		POST_HTTP_HEADER="POST ${URL_PATH} HTTP/1.0\nContent-Type: application/x-www-form-urlencoded\nContent-Length: ${POST_DATA_SIZE}\n\n"
 		 
 		POST_DATA="${POST_HTTP_HEADER}${POST_DATA}"
 		
