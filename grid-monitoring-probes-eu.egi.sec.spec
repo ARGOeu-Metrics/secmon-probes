@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.11
-Release: 43%{?dist}
+Release: 44%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -85,6 +85,9 @@ cd -
 %{dir}
 
 %changelog
+* Mon Feb 5 2018 Vincent Brillault - 1.0.11-44
+- Argus-ban: don't fail for authorization when listing PAPs
+
 * Tue May 30 2017 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-43
 - Added configuration for a new Pakiti server
 
