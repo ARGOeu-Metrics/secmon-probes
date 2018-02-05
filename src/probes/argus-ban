@@ -121,7 +121,10 @@ def get_dyn_dn_dates(server, cert, key, salt, raw=False, all_raw=False):
                     transport = MyHTTPSTransport(key, cert),
                     plugins=[ListPoliciesFilter(salt, res, raw=raw, all_raw=all_raw)])
     for alias in aliases:
-        client.service.listPolicies(alias)
+        try:
+            client.service.listPolicies(alias)
+        except suds.WebFault, e:
+            pass
     return res
 
 
