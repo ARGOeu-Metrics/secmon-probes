@@ -18,6 +18,7 @@
                (check_CVE-2015-3245.msg "")(check_CVE-2015-3245.res "")
                (check_CVE-2016-5195.msg "")(check_CVE-2016-5195.res "")
                (check_EGI-SVG-2016-5195.msg "")(check_EGI-SVG-2016-5195.res "")
+               (check_EGI-SVG-2018-14213.msg "")(check_EGI-SVG-2018-14213.res "")
 )
 (walltime = "15 min")
 (memory = "640")
