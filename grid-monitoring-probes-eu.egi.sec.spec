@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.11
-Release: 44%{?dist}
+Release: 45%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -53,6 +53,8 @@ pattern libkeyutils.so* that doesn't belong to an installed RPM package
 - Check if mitigation for CVE-2016-5195 has been applied
 * WN-check_EGI-SVG-2016-5195
 - Check if mitigation for EGI-SVG-2016-5195 has been applied
+* WN-check_EGI-SVG-2018-14213
+- Check if mitigations for EGI-SVG-2018-14213 have been applied
 %prep
 %setup -q
 
@@ -85,6 +87,9 @@ cd -
 %{dir}
 
 %changelog
+* Fri Apr 6 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-45
+- Add a check of mitigations for EGI-SVG-2018-14213
+
 * Mon Feb 5 2018 Vincent Brillault - 1.0.11-44
 - Argus-ban: don't fail for authorization when listing PAPs
 
