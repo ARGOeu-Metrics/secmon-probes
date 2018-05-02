@@ -1,3 +1,6 @@
+* Wed May 2 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-45
+- Check all suid commands used by Singularity
+
 * Fri Apr 6 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-45
 - Add a check of mitigations for EGI-SVG-2018-14213
 
