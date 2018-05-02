@@ -5,8 +5,15 @@ NAGIOS_ERROR=2
 
 SINGULARITY_CONFIG=/etc/singularity/singularity.conf
 
-if [ ! -u "/usr/libexec/singularity/sexec-suid" ]; then
-    echo "sexec-suid doesn't have the set-uid bit set"
+SUID_SET="no"
+for bin in /usr/libexec/singularity/bin/*-suid; do
+    if [ -u "$bin" ]; then
+        SUID_SET="yes"
+        break
+    fi
+done
+if [ "$SUID_SET" = "no" ]; then
+    echo "no singularity suid command has the set-uid bit set"
     exit $NAGIOS_OK
 fi
 
