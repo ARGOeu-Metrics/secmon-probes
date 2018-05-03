@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.11
-Release: 46%{?dist}
+Release: 47%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -87,8 +87,12 @@ cd -
 %{dir}
 
 %changelog
-* Wed May 2 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-45
-- Check all suid commands used by Singularity
+* Thu May 3 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-47
+- check_EGI-SVG-2018-14213 : disabling overlay doesn't actually prevent
+  from the vulnerability
+
+* Wed May 2 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-46
+- check_EGI-SVG-2018-14213 : check all suid commands used by Singularity
 
 * Fri Apr 6 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-45
 - Add a check of mitigations for EGI-SVG-2018-14213
