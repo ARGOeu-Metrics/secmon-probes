@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.11
-Release: 47%{?dist}
+Release: 48%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -55,6 +55,8 @@ pattern libkeyutils.so* that doesn't belong to an installed RPM package
 - Check if mitigation for EGI-SVG-2016-5195 has been applied
 * WN-check_EGI-SVG-2018-14213
 - Check if mitigations for EGI-SVG-2018-14213 have been applied
+* WN-check_CVE-2018-1111
+- Check if mitigations for CVE-2018-1111 have been applied
 %prep
 %setup -q
 
@@ -87,6 +89,9 @@ cd -
 %{dir}
 
 %changelog
+* Tue Jun 12 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-48
+- check_CVE-2018-1111 : add a mitigation check for CVE-2018-1111
+
 * Thu May 3 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-47
 - check_EGI-SVG-2018-14213 : disabling overlay doesn't actually prevent
   from the vulnerability

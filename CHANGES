@@ -1,3 +1,6 @@
+* Tue Jun 12 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-48
+- check_CVE-2018-1111 : add a mitigation check for CVE-2018-1111
+
 * Thu May 3 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-47
 - check_EGI-SVG-2018-14213 : disabling overlay doesn't actually prevent
   from the vulnerability
