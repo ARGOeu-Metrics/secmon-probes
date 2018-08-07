@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 1.0.11
-Release: 48%{?dist}
+Release: 49%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -57,6 +57,8 @@ pattern libkeyutils.so* that doesn't belong to an installed RPM package
 - Check if mitigations for EGI-SVG-2018-14213 have been applied
 * WN-check_CVE-2018-1111
 - Check if mitigations for CVE-2018-1111 have been applied
+* WN-check_CVE-2018-12021
+- Check if mitigations for CVE-2018-12021 have been applied
 %prep
 %setup -q
 
@@ -89,6 +91,9 @@ cd -
 %{dir}
 
 %changelog
+* Mon Aug 06 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-49
+- check_CVE-2018-12021: add a mitigation test for CVE-2018-12021
+
 * Tue Jun 12 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-48
 - check_CVE-2018-1111 : add a mitigation check for CVE-2018-1111
 
