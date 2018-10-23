@@ -1,6 +1,6 @@
 #!/bin/sh
 
-probes="FilePermVulns Pakiti Permissions RDSModuleCheck Torque check_CVE-2013-2094 check_CVE-2015-3245 check_CVE-2016-5195 check_EGI-SVG-2016-5195 check_EGI-SVG-2018-14213 check_CVE-2018-1111 check_CVE-2018-12021"
+probes="FilePermVulns Pakiti Permissions RDSModuleCheck Torque check_CVE-2013-2094 check_CVE-2015-3245 check_CVE-2016-5195 check_EGI-SVG-2016-5195 check_EGI-SVG-2018-14213 check_CVE-2018-1111 check_CVE-2018-12021 check_CVE-2018-14634"
 export SITE_NAME=`cat sitename 2> /dev/null`
 
 tar -zxf probes.tar.gz
