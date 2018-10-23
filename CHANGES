@@ -1,3 +1,6 @@
+* Mon Oct 22 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-50
+- check_CVE-2018-14634: add a mitigation check for CVE-2018-14634
+
 * Mon Aug 06 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-49
 - check_CVE-2018-12021: add a mitigation test for CVE-2018-12021
 
