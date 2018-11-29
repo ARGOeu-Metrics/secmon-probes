@@ -1,5 +1,7 @@
 * Tue Nov 27 2018 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-1
-- Completely new version, using:
+- New version, for use with ARGO and Centos 6 or 7.
+  The security probes remain the same, but the submission to the sites
+  is done using:
   * NorduGrid ARC Nagios Plugins
   * Modified CREAM-CE direct job submission metrics
 
