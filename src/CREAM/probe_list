@@ -1,3 +1,4 @@
+CRL
 FilePermVulns
 Pakiti
 Permissions
@@ -6,8 +7,10 @@ Torque
 check_CVE-2013-2094
 check_CVE-2015-3245
 check_CVE-2016-5195
-check_EGI-SVG-2016-5195
-check_EGI-SVG-2018-14213
 check_CVE-2018-1111
 check_CVE-2018-12021
 check_CVE-2018-14634
+check_EGI-SVG-2016-5195
+check_EGI-SVG-2018-14213
+dcache-perms
+libkeyutils

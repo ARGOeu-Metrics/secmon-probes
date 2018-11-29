@@ -5,24 +5,23 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 1.0.11
-Release: 51%{?dist}
+Version: 2.0.0
+Release: 1%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
 Source0: %{name}-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Requires: emi-cream-nagios
+Requires: nordugrid-arc-client
 AutoReqProv: no
 BuildArch: noarch
-Obsoletes: grid-monitoring-probes-org.sam.sec
 
 %description
 This package includes the framework to submit grid jobs to monitor the security of the EGI sites.
-Special care has been taken so that results of the probes are transmitted back to the Nagios server using a secure channel.
 
 Currently it supports the following middlewares:
-- gLite
+- UMD (CREAM)
 - ARC
 
 Additionally it contains the following Nagios probes:
@@ -70,19 +69,20 @@ pattern libkeyutils.so* that doesn't belong to an installed RPM package
 export DONT_STRIP=1
 %{__rm} -rf %{buildroot}
 install --directory %{buildroot}%{dir}
+install --directory %{buildroot}%{_sysconfdir}/arc/nagios
 
 # Install probes for general usage
 %{__cp} -rpf .%dir/probes  %{buildroot}%{dir}
 
-# gLite configuration
-%{__cp} -rpf .%dir/gLite  %{buildroot}%{dir}
-%{__cp} -rpf .%dir/probes  %{buildroot}%{dir}/gLite/wnjob/%{site}/probes/%{site}
-
 # ARC configuration
-%{__cp} -rpf .%dir/ARC  %{buildroot}%{dir}
-chmod +x %{buildroot}%{dir}/ARC/CE-Jobsubmit
+%{__cp} -rpf .%{_sysconfdir}/arc/nagios/50-secmon.d  %{buildroot}%{_sysconfdir}/arc/nagios
+%{__cp} -rpf .%{_sysconfdir}/arc/nagios/50-secmon.ini  %{buildroot}%{_sysconfdir}/arc/nagios
+
+# CREAM configuration
+%{__cp} -rpf .%dir/CREAM  %{buildroot}%{dir}
+chmod +x %{buildroot}%{dir}/CREAM/cream_jobSubmit_secmon.py
 cd .%dir/probes/
-tar -zcvf %{buildroot}%{dir}/ARC/jobsubmit/probes.tar.gz *
+tar -zcvf %{buildroot}%{dir}/CREAM/probes.tar.gz *
 cd -
 
 %clean
@@ -91,8 +91,14 @@ cd -
 %files
 %defattr(-,root,root,-)
 %{dir}
+%{_sysconfdir}/arc/nagios
 
 %changelog
+* Tue Nov 27 2018 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-1
+- Completely new version, using:
+  * NorduGrid ARC Nagios Plugins
+  * Modified CREAM-CE direct job submission metrics
+
 * Mon Oct 29 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-51
 - Use the right operator in check_CVE-2018-14634
 

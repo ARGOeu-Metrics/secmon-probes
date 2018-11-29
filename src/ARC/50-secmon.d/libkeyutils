@@ -1,0 +1,17 @@
+#!/bin/bash
+
+NAGIOS_OK=0
+NAGIOS_WARNING=1
+NAGIOS_ERROR=2
+NAGIOS_UNKNOWN=3
+
+if rpm -qf /lib*/libkeyutils.so* | grep -q "is not owned by any package"
+then
+  echo -n "CRITICAL: "
+  rpm -qf /lib*/libkeyutils.so* | grep "is not owned by any package" | tr '\n' ' '
+  echo
+  exit $NAGIOS_ERROR
+else
+  echo "OK: no suspect files found"
+  exit $NAGIOS_OK
+fi
