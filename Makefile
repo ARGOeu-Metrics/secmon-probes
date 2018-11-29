@@ -1,7 +1,8 @@
 SITE=eu.egi.sec
 
 SPECFILE=grid-monitoring-probes-${SITE}.spec
-PROBES=src/gLite src/ARC src/probes
+PROBES=src/CREAM src/probes
+ARC=src/ARC/50-secmon.ini src/ARC/50-secmon.d
 FILES=CHANGES
 
 NOOP    = true
@@ -16,7 +17,9 @@ distdir = dist/$(PKGNAME)-$(PKGVERS)
 
 dist: $(SPECFILE) $(PROBES) $(FILES)
 	mkdir -p $(distdir)/usr/libexec/grid-monitoring/probes/$(SITE)
+	mkdir -p $(distdir)/etc/arc/nagios
 	cp -rpf $(PROBES) $(distdir)/usr/libexec/grid-monitoring/probes/$(SITE)
+	cp -rpf $(ARC) $(distdir)/etc/arc/nagios
 	cp -f $(FILES) $(distdir)
 	find $(distdir) -path '*svn*' -prune -exec rm -rf {} \;
 	find $(distdir) -path '.*swp' -prune -exec rm -rf {} \;
@@ -29,21 +32,21 @@ bldprep: dist $(SPECFILE)
 rpmsrc: bldprep dist $(SPECFILE)
 	$(rpmbuild) -bs $(SPECFILE)
 
-rpmsrcel4: bldprep dist $(SPECFILE)
-	$(rpmbuild) -bs --define 'dist .el4' $(SPECFILE)
+rpmsrcel6: bldprep dist $(SPECFILE)
+	$(rpmbuild) -bs --define 'dist .el6' $(SPECFILE)
 
-rpmsrcel5: bldprep dist $(SPECFILE)
-	$(rpmbuild) -bs --define 'dist .el5' $(SPECFILE)
+rpmsrcel7: bldprep dist $(SPECFILE)
+	$(rpmbuild) -bs --define 'dist .el7' $(SPECFILE)
 
-rpmsrcs: rpmsrcel4 rpmsrcel5
+rpmsrcs: rpmsrcel6 rpmsrcel7
 
-rpmel4: bldprep dist $(SPECFILE)
-	$(rpmbuild) --define 'dist .el4' -ba $(SPECFILE)	
+rpmel6: bldprep dist $(SPECFILE)
+	$(rpmbuild) --define 'dist .el6' -ba $(SPECFILE)	
 
-rpmel5: bldprep dist $(SPECFILE)
-	$(rpmbuild) --define 'dist .el5' -ba $(SPECFILE)
+rpmel7: bldprep dist $(SPECFILE)
+	$(rpmbuild) --define 'dist .el7' -ba $(SPECFILE)
 
-rpm: rpmel4 rpmel5 
+rpm: rpmel6 rpmel7
 
 clean:
 	rm -rf dist

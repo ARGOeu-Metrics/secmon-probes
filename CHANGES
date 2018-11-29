@@ -1,3 +1,19 @@
+* Tue Nov 27 2018 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-1
+- New version, for use with ARGO and Centos 6 or 7.
+  The security probes remain the same, but the submission to the sites
+  is done using:
+  * NorduGrid ARC Nagios Plugins
+  * Modified CREAM-CE direct job submission metrics
+
+* Mon Oct 29 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-51
+- Use the right operator in check_CVE-2018-14634
+
+* Mon Oct 22 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-50
+- check_CVE-2018-14634: add a mitigation check for CVE-2018-14634
+
+* Mon Aug 06 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-49
+- check_CVE-2018-12021: add a mitigation test for CVE-2018-12021
+
 * Tue Jun 12 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-48
 - check_CVE-2018-1111 : add a mitigation check for CVE-2018-1111
 

@@ -1,0 +1,201 @@
+#!/bin/bash
+
+NAGIOS_OK=0
+NAGIOS_WARNING=1
+NAGIOS_ERROR=2
+
+BLACKLISTED_PATERNS="^/tmp /lsf /.snapshot"
+
+function echo_error_or_warning() {
+   # If the file/dir is in $PATH, then echo an ERROR.
+   # else, echo a WARNING
+   if [ `which $1 2> /dev/null; echo $?` -eq 0 ]; then
+      total_errors=$(($total_errors + 1));
+      output=${output}"##### 'ERROR': '$1' has write permissions for Others\n"
+   else
+      total_warnings=$(($total_warnings + 1));
+      output=${output}"##### 'WARNING': '$1' has write permissions for Others\n"
+   fi
+
+   if [ -d "$1" ]; then
+      ls_out=`ls -lad $1`
+      output=${output}"${ls_out}\n"
+   else
+      ls_out=`ls -la $1`
+      output=${output}"${ls_out}\n"
+   fi
+}
+
+function check_privileges() {
+   # Check if file or directory passed as argument has write permission to Other group.
+   filename=$1
+   
+   found_blacklisted=0
+   for b in $BLACKLISTED_PATERNS; do
+      echo "$filename" | egrep -e "$b" > /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+         found_blacklisted=1
+         break
+      fi
+   done
+   [ $found_blacklisted -eq 1 ] && continue
+   
+   if [ -d "$filename" -o -f "$filename" ]; then             # It's an existing file or directory 
+      if ! [ -h "$filename" -o -b "$filename" -o -c "$filename" -o -p "$filename" -o -S "$filename" ]; then
+         # It's not a symbolic link, block special, special character, pipe or socket
+         fp=`stat -c %A $filename`                       # Getting file permissions.
+         tp=`expr substr $fp 10 1`                       # Extract last permission bit: ---------X
+         if [ "$tp" != "t" ]; then                       # It's not a tmp directory
+            if [ ${filename:0:4} == "/afs" ]; then       # It's a file/dir in AFS
+               # Use 'fs listacl' to find writtable permission
+               acls=`fs listacl $filename`
+               OIFS=${IFS}
+               IFS=$'\n'
+
+               for f in $acls; do                        # Check each file in the directory
+                  acl_pos=`gawk 'BEGIN { print index("'"$f"'", "anyuser") }'`
+                  if [ "$acl_pos" -gt "0" ]; then        # There is an ACL for 'anyuser'
+                     acl_pos=$(($acl_pos + 7))           # retrieve the ACL
+                     result=${f:$acl_pos}
+                     if [ `expr index "$result" w` -eq "1" ]; then
+                        # $filename is readable to anyone
+                        echo_error_or_warning "$filename"
+                     fi
+                  fi
+               done
+
+               IFS=${OIFS}
+            else
+               wp=`expr substr $fp 9 1`                  # Extract write permission bit for everybody: --------X-
+               if [ "$wp" == "w" ]; then                 # The file has write permission to Other group.
+                  echo_error_or_warning "$filename"
+               fi
+            fi
+         fi
+      fi
+   fi
+}
+
+function check_file_or_dir () {
+   # For each directory list its files and check privileges for any file and directory.
+
+   file_or_dir=$1
+
+   if [ -e "$file_or_dir" ]; then                          # The file or directory exists.
+      if [ -d "$file_or_dir" ]; then                       # It's a directory.
+         directory=$file_or_dir
+         dir_checked=0
+         num_dirs=`echo ${#checked_dirs[*]}`
+         index=0
+
+         while [ "$index" -lt "$num_dirs" ]
+         do  
+            if [ "${checked_dirs[$index]}" == "$directory" ]; then
+               dir_checked=1                             # This directory has already been checked.
+            fi
+            let "index = $index + 1"
+         done
+
+         if [ $dir_checked == "0" ]; then                # It's a new directory.
+            files=`ls -a $directory`
+
+            for f in $files; do                          # Check each file in the directory
+               if [ $f != "." ] && [ $f != ".." ]; then  # Skipping '.' and '..' names.
+                  file_or_dir=$directory/$f
+                  check_privileges $file_or_dir
+               fi
+            done
+
+            checked_dirs[$num_dirs]=$directory
+            check_privileges $directory                  # Check the directory name.
+         fi
+      else
+         check_privileges $file_or_dir                   # Check the file found in env vars.
+      fi
+   fi
+}
+
+function echo_array () {
+   # List values in array passed as argument
+   passed_array=( `echo "$1"` )
+   num_dirs=`echo ${#passed_array[*]}`
+   index=0
+
+   while [ "$index" -lt "$num_dirs" ]
+   do    # List all the elements in the array.
+      output=${output}"${passed_array[$index]}\n"
+      let "index = $index + 1"
+   done
+}
+
+function print_summary_metric_results () {
+
+   if [ $total_errors -gt 0 ]; then
+      echo "ERROR: Found world writtable files or/and folders in PATH"
+   else
+      if [ $total_warnings -gt 0 ]; then
+         echo "WARNING: Found world writtable files or/and folders"
+      else
+         echo "OK: No world writtable files or folders found"
+      fi
+   fi
+
+   echo -e $output
+
+}
+
+start_time=`date -u +%s`
+envs=`env | grep = | cut -d= -f1`
+total_errors=0
+total_warnings=0
+declare -a checked_dirs  # Array containing all checked directories
+return_code=$NAGIOS_OK
+
+for env in $envs ; do
+   val=`eval echo '$'$env`
+   OIFS=$IFS
+   IFS=":"
+
+   for n in $val; do # For each directory/file in the environment variable do: 
+      IFS=$OIFS
+      if [ -n "$n" ]; then
+         check_file_or_dir $n
+      fi
+      IFS=":"
+   done
+
+   IFS=${OIFS}
+done
+
+output=${output}"*******************\n"
+output=${output}"Checked directories:\n"
+output=${output}"*******************\n"
+argument=`echo ${checked_dirs[@]}`
+echo_array "$argument\n"
+
+output=${output}"***************************\n"
+output=${output}"Number of errors   found: ${total_errors}\n"
+output=${output}"Number of warnings found: ${total_warnings}\n"
+output=${output}"***************************\n"
+
+print_summary_metric_results
+
+end_time=`date -u +%s`
+seconds=$(($end_time - $start_time))
+echo "********************************"
+echo "*  Time to execute this test: ${seconds} seconds  *"
+echo "********************************"
+
+
+if [ $total_errors -gt 0 ]; then
+   return_code=$NAGIOS_ERROR
+   exit $return_code
+else
+   if [ $total_warnings -gt 0 ]; then
+      return_code=$NAGIOS_WARNING
+      exit $return_code
+   fi
+fi
+
+exit $return_code
+
