@@ -1,0 +1,25 @@
+#!/bin/bash
+cur_path=`dirname $0`
+
+if [ "X"$SITE_NAME == "X" ] && [ "X"$LCG_GFAL_INFOSYS != "X" ]; then
+	if [ "X"$GLOBUS_CE != "X" ]; then
+		export SITE_NAME=`ldapsearch -LL -x -h $LCG_GFAL_INFOSYS -b o=grid "(GlueClusterService=$GLOBUS_CE)" GlueForeignKey |grep GlueSiteUniqueID|awk -F= '{print $2}'`
+	elif [ "X"$CE_ID != "X" ]; then
+		export SITE_NAME=`ldapsearch -LL -x -h $LCG_GFAL_INFOSYS -b o=grid "(GlueClusterService=$CE_ID)" GlueForeignKey |grep GlueSiteUniqueID|awk -F= '{print $2}'`
+	fi
+fi
+
+result=`${cur_path}/pakiti-client 2>&1`
+exit_status=$?
+
+if [ ${exit_status} == 0 ]; then
+  echo "OK: Pakiti reported correctly to all the configured servers."
+else
+  if [ ${exit_status} == 1 ]; then
+    echo "WARNING: Pakiti didn't report to all configured servers."
+  else
+    echo "ERROR: There was an error on pakiti reporting."
+  fi
+fi
+echo ${result}|sed -e "s# ERROR#\nERROR#g" -e "s# WARNING#\nWARNING#g"
+exit ${exit_status}

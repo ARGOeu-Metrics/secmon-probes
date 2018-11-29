@@ -1,0 +1,10 @@
+[
+Type="Job";
+JobType="Normal";
+Executable = "testjob.sh";
+StdOutput = "std.out";
+StdError = "std.err";
+InputSandbox = {"/usr/libexec/grid-monitoring/probes/eu.egi.sec/CREAM/testjob.sh","/usr/libexec/grid-monitoring/probes/eu.egi.sec/CREAM/probes.tar.gz","/usr/libexec/grid-monitoring/probes/eu.egi.sec/CREAM/probe_list"};
+OutputSandbox = {"CRL.out","CRL.res","FilePermVulns.out","FilePermVulns.res","Pakiti.out","Pakiti.res","Permissions.out","Permissions.res","RDSModuleCheck.out","RDSModuleCheck.res","Torque.out","Torque.res","check_CVE-2013-2094.out","check_CVE-2013-2094.res","check_CVE-2015-3245.out","check_CVE-2015-3245.res","check_CVE-2016-5195.out","check_CVE-2016-5195.res","check_EGI-SVG-2016-5195.out","check_EGI-SVG-2016-5195.res","check_EGI-SVG-2018-14213.out","check_EGI-SVG-2018-14213.res","dcache-perms.out","dcache-perms.res","libkeyutils.out","libkeyutils.res","check_CVE-2018-1111.out","check_CVE-2018-1111.res","check_CVE-2018-12021.out","check_CVE-2018-12021.res","check_CVE-2018-14634.out","check_CVE-2018-14634.res"};
+OutputSandboxBaseDestUri="gsiftp://localhost";
+]
