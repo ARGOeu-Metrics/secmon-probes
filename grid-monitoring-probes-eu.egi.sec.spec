@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 2.0.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -81,8 +81,8 @@ install --directory %{buildroot}%{_sysconfdir}/arc/nagios
 # CREAM configuration
 %{__cp} -rpf .%dir/CREAM  %{buildroot}%{dir}
 chmod +x %{buildroot}%{dir}/CREAM/cream_jobSubmit_secmon.py
-cd .%dir/probes/
-tar -zcvf %{buildroot}%{dir}/CREAM/probes.tar.gz *
+cd .%dir
+tar -zcvf %{buildroot}%{dir}/CREAM/probes.tar.gz probes/
 cd -
 
 %clean
@@ -94,6 +94,10 @@ cd -
 %{_sysconfdir}/arc/nagios
 
 %changelog
+* Mon Feb 5 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-2
+- Fix CREAM probes packaging bug in SPEC file.
+- Use Net::SSL in check_pakiti_vuln, otherwise authentication with Pakiti server fails.
+
 * Tue Nov 27 2018 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-1
 - New version, for use with ARGO and Centos 6 or 7.
   The security probes remain the same, but the submission to the sites
