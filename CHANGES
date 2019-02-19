@@ -1,3 +1,7 @@
+* Tue Feb 19 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-3
+- Add requirement for perl-Text-CSV in SPEC file.
+- Create /var/spool/cream.
+
 * Mon Feb 5 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-2
 - Fix CREAM probes packaging bug in SPEC file.
 - Use Net::SSL in check_pakiti_vuln, otherwise authentication with Pakiti server fails.
