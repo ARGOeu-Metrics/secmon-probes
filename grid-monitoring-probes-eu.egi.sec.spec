@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 2.0.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -14,6 +14,7 @@ Source0: %{name}-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Requires: emi-cream-nagios
 Requires: nordugrid-arc-client
+Requires: perl-Text-CSV
 AutoReqProv: no
 BuildArch: noarch
 
@@ -70,6 +71,7 @@ export DONT_STRIP=1
 %{__rm} -rf %{buildroot}
 install --directory %{buildroot}%{dir}
 install --directory %{buildroot}%{_sysconfdir}/arc/nagios
+install --directory %{buildroot}/var/spool/cream
 
 # Install probes for general usage
 %{__cp} -rpf .%dir/probes  %{buildroot}%{dir}
@@ -90,10 +92,18 @@ cd -
 
 %files
 %defattr(-,root,root,-)
-%{dir}
+%dir
 %{_sysconfdir}/arc/nagios
+%dir
+/var/spool/cream
+%attr(755,nagios,nagios) /var/spool/cream
 
 %changelog
+
+* Tue Feb 19 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-3
+- Add requirement for perl-Text-CSV in SPEC file.
+- Create /var/spool/cream.
+
 * Mon Feb 5 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-2
 - Fix CREAM probes packaging bug in SPEC file.
 - Use Net::SSL in check_pakiti_vuln, otherwise authentication with Pakiti server fails.
