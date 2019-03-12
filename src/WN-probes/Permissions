@@ -152,7 +152,7 @@ declare -a checked_dirs  # Array containing all checked directories
 return_code=$NAGIOS_OK
 
 for env in $envs ; do
-   val=`eval echo '$'$env`
+   val=`eval echo \"'$'$env\"`
    OIFS=$IFS
    IFS=":"
 

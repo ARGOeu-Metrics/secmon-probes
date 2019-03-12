@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 2.0.0
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -73,19 +73,24 @@ install --directory %{buildroot}%{dir}
 install --directory %{buildroot}%{_sysconfdir}/arc/nagios
 install --directory %{buildroot}/var/spool/cream
 
-# Install probes for general usage
-%{__cp} -rpf .%dir/probes  %{buildroot}%{dir}
 
 # ARC configuration
-%{__cp} -rpf .%{_sysconfdir}/arc/nagios/50-secmon.d  %{buildroot}%{_sysconfdir}/arc/nagios
-%{__cp} -rpf .%{_sysconfdir}/arc/nagios/50-secmon.ini  %{buildroot}%{_sysconfdir}/arc/nagios
+%{__cp} -rpf .%{_sysconfdir}/arc/nagios/50-secmon.ini %{buildroot}%{_sysconfdir}/arc/nagios
+%{__cp} -rpf .%dir/WN-probes %{buildroot}%{_sysconfdir}/arc/nagios/50-secmon.d
+%{__rm} -rf %{buildroot}%{_sysconfdir}/arc/nagios/50-secmon.d/pakiti_cas
+cd .%dir/WN-probes
+tar -zcvf %{buildroot}%{_sysconfdir}/arc/nagios/50-secmon.d/pakiti_cas.tar.gz pakiti_cas/
+cd -
 
 # CREAM configuration
 %{__cp} -rpf .%dir/CREAM  %{buildroot}%{dir}
 chmod +x %{buildroot}%{dir}/CREAM/cream_jobSubmit_secmon.py
-cd .%dir
-tar -zcvf %{buildroot}%{dir}/CREAM/probes.tar.gz probes/
+cd .%dir/
+tar -zcvf %{buildroot}%{dir}/CREAM/WN-probes.tar.gz WN-probes/
 cd -
+
+# Install probes for general usage
+%{__cp} -rpf .%dir/probes  %{buildroot}%{dir}/
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -99,6 +104,10 @@ cd -
 %attr(755,nagios,nagios) /var/spool/cream
 
 %changelog
+
+* Wed Mar 6 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-4
+- Fix bug in Permissions test
+- Include CRL and dcache-perms in ARC tests
 
 * Tue Feb 19 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-3
 - Add requirement for perl-Text-CSV in SPEC file.
