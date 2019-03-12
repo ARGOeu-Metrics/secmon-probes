@@ -1,3 +1,7 @@
+* Wed Mar 6 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-4
+- Fix bug in Permissions test
+- Include CRL and dcache-perms in ARC tests
+
 * Tue Feb 19 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-3
 - Add requirement for perl-Text-CSV in SPEC file.
 - Create /var/spool/cream.

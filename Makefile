@@ -1,8 +1,10 @@
 SITE=eu.egi.sec
 
 SPECFILE=grid-monitoring-probes-${SITE}.spec
-PROBES=src/CREAM src/probes
-ARC=src/ARC/50-secmon.ini src/ARC/50-secmon.d
+PROBES=src/probes
+WNPROBES=src/WN-probes
+ARC=src/ARC/50-secmon.ini
+CREAM=src/CREAM
 FILES=CHANGES
 
 NOOP    = true
@@ -15,11 +17,13 @@ PKGVERS = $(shell grep -s '^Version:' $(SPECFILE) | sed -e 's/Version: *//')
 
 distdir = dist/$(PKGNAME)-$(PKGVERS)
 
-dist: $(SPECFILE) $(PROBES) $(FILES)
+dist: $(SPECFILE) $(PROBES) $(WNPROBES) $(ARC) $(CREAM) $(FILES)
 	mkdir -p $(distdir)/usr/libexec/grid-monitoring/probes/$(SITE)
 	mkdir -p $(distdir)/etc/arc/nagios
 	cp -rpf $(PROBES) $(distdir)/usr/libexec/grid-monitoring/probes/$(SITE)
+	cp -rpf $(WNPROBES) $(distdir)/usr/libexec/grid-monitoring/probes/$(SITE)
 	cp -rpf $(ARC) $(distdir)/etc/arc/nagios
+	cp -rpf $(CREAM) $(distdir)/usr/libexec/grid-monitoring/probes/$(SITE)
 	cp -f $(FILES) $(distdir)
 	find $(distdir) -path '*svn*' -prune -exec rm -rf {} \;
 	find $(distdir) -path '.*swp' -prune -exec rm -rf {} \;
