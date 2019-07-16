@@ -27,6 +27,7 @@ use Nagios::Plugin;
 use LWP::UserAgent;
 use GridMon::Nagios;
 use Text::CSV;
+use Net::SSL ();
 
 # Standard variables used in Nagios::Plugin constructor
 use constant PROGNAME => "check_pakiti_vuln";

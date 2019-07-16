@@ -5,24 +5,24 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 1.0.11
-Release: 51%{?dist}
+Version: 2.0.0
+Release: 4%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
 Source0: %{name}-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Requires: emi-cream-nagios
+Requires: nordugrid-arc-client
+Requires: perl-Text-CSV
 AutoReqProv: no
 BuildArch: noarch
-Obsoletes: grid-monitoring-probes-org.sam.sec
 
 %description
 This package includes the framework to submit grid jobs to monitor the security of the EGI sites.
-Special care has been taken so that results of the probes are transmitted back to the Nagios server using a secure channel.
 
 Currently it supports the following middlewares:
-- gLite
+- UMD (CREAM)
 - ARC
 
 Additionally it contains the following Nagios probes:
@@ -70,29 +70,60 @@ pattern libkeyutils.so* that doesn't belong to an installed RPM package
 export DONT_STRIP=1
 %{__rm} -rf %{buildroot}
 install --directory %{buildroot}%{dir}
+install --directory %{buildroot}%{_sysconfdir}/arc/nagios
+install --directory %{buildroot}/var/spool/cream
 
-# Install probes for general usage
-%{__cp} -rpf .%dir/probes  %{buildroot}%{dir}
-
-# gLite configuration
-%{__cp} -rpf .%dir/gLite  %{buildroot}%{dir}
-%{__cp} -rpf .%dir/probes  %{buildroot}%{dir}/gLite/wnjob/%{site}/probes/%{site}
 
 # ARC configuration
-%{__cp} -rpf .%dir/ARC  %{buildroot}%{dir}
-chmod +x %{buildroot}%{dir}/ARC/CE-Jobsubmit
-cd .%dir/probes/
-tar -zcvf %{buildroot}%{dir}/ARC/jobsubmit/probes.tar.gz *
+%{__cp} -rpf .%{_sysconfdir}/arc/nagios/50-secmon.ini %{buildroot}%{_sysconfdir}/arc/nagios
+%{__cp} -rpf .%dir/WN-probes %{buildroot}%{_sysconfdir}/arc/nagios/50-secmon.d
+%{__rm} -rf %{buildroot}%{_sysconfdir}/arc/nagios/50-secmon.d/pakiti_cas
+cd .%dir/WN-probes
+tar -zcvf %{buildroot}%{_sysconfdir}/arc/nagios/50-secmon.d/pakiti_cas.tar.gz pakiti_cas/
 cd -
+
+# CREAM configuration
+%{__cp} -rpf .%dir/CREAM  %{buildroot}%{dir}
+chmod +x %{buildroot}%{dir}/CREAM/cream_jobSubmit_secmon.py
+cd .%dir/
+tar -zcvf %{buildroot}%{dir}/CREAM/WN-probes.tar.gz WN-probes/
+cd -
+
+# Install probes for general usage
+%{__cp} -rpf .%dir/probes  %{buildroot}%{dir}/
 
 %clean
 %{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%{dir}
+%dir
+%{_sysconfdir}/arc/nagios
+%dir
+/var/spool/cream
+%attr(755,nagios,nagios) /var/spool/cream
 
 %changelog
+
+* Wed Mar 6 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-4
+- Fix bug in Permissions test
+- Include CRL and dcache-perms in ARC tests
+
+* Tue Feb 19 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-3
+- Add requirement for perl-Text-CSV in SPEC file.
+- Create /var/spool/cream.
+
+* Mon Feb 5 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-2
+- Fix CREAM probes packaging bug in SPEC file.
+- Use Net::SSL in check_pakiti_vuln, otherwise authentication with Pakiti server fails.
+
+* Tue Nov 27 2018 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-1
+- New version, for use with ARGO and Centos 6 or 7.
+  The security probes remain the same, but the submission to the sites
+  is done using:
+  * NorduGrid ARC Nagios Plugins
+  * Modified CREAM-CE direct job submission metrics
+
 * Mon Oct 29 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-51
 - Use the right operator in check_CVE-2018-14634
 

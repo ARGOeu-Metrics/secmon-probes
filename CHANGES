@@ -1,3 +1,22 @@
+* Wed Mar 6 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-4
+- Fix bug in Permissions test
+- Include CRL and dcache-perms in ARC tests
+
+* Tue Feb 19 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-3
+- Add requirement for perl-Text-CSV in SPEC file.
+- Create /var/spool/cream.
+
+* Mon Feb 5 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-2
+- Fix CREAM probes packaging bug in SPEC file.
+- Use Net::SSL in check_pakiti_vuln, otherwise authentication with Pakiti server fails.
+
+* Tue Nov 27 2018 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-1
+- New version, for use with ARGO and Centos 6 or 7.
+  The security probes remain the same, but the submission to the sites
+  is done using:
+  * NorduGrid ARC Nagios Plugins
+  * Modified CREAM-CE direct job submission metrics
+
 * Mon Oct 29 2018 Daniel Kouril <kouril@ics.muni.cz> - 1.0.11-51
 - Use the right operator in check_CVE-2018-14634
 
