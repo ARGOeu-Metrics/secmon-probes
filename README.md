@@ -27,11 +27,11 @@ Worker Nodes via a grid job that is submitted to each CREAM CE and ARC CE.
 
 ## ARC CE tests
 
-For the ARC CE job submission we use the [http://git.nbi.ku.dk/downloads/NorduGridARCNagiosPlugins/arcce.html NorduGrid ARC Nagios Plugins].
+For the ARC CE job submission we use the [NorduGrid ARC Nagios Plugins](http://git.nbi.ku.dk/downloads/NorduGridARCNagiosPlugins/arcce.html).
 
 ## CREAM CE tests
 
-For the CREAM CE job submission we use a script heavily based on the [https://wiki.italiangrid.it/twiki/bin/view/CREAM/DjsCreamProbeNew Italiangrid CREAM-CE direct job submission metrics]. Our version of """cream_jobSubmit.py""" is modified so it submits a job payload containing all the security passive checks, it retrieves the output and posts the results to Nagios.
+For the CREAM CE job submission we use a script heavily based on the [Italiangrid CREAM-CE direct job submission metrics](https://wiki.italiangrid.it/twiki/bin/view/CREAM/DjsCreamProbeNew). Our version of """cream_jobSubmit.py""" is modified so it submits a job payload containing all the security passive checks, it retrieves the output and posts the results to Nagios.
 
 ## Directory structure
 
