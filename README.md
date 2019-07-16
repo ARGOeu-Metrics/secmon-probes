@@ -31,7 +31,7 @@ For the ARC CE job submission we use the [NorduGrid ARC Nagios Plugins](http://g
 
 ## CREAM CE tests
 
-For the CREAM CE job submission we use a script heavily based on the [Italiangrid CREAM-CE direct job submission metrics](https://wiki.italiangrid.it/twiki/bin/view/CREAM/DjsCreamProbeNew). Our version of """cream_jobSubmit.py""" is modified so it submits a job payload containing all the security passive checks, it retrieves the output and posts the results to Nagios.
+For the CREAM CE job submission we use a script heavily based on the [Italiangrid CREAM-CE direct job submission metrics](https://wiki.italiangrid.it/twiki/bin/view/CREAM/DjsCreamProbeNew). Our version of `cream_jobSubmit.py` is modified so it submits a job payload containing all the security passive checks, it retrieves the output and posts the results to Nagios.
 
 ## Directory structure
 
