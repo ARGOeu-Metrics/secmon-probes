@@ -44,6 +44,7 @@ use constant SHORTNAME => 'Pakiti-Vuln';
 use constant USAGE => "usage: check_pakiti_vuln -H <hostname> \n";
 
 use constant PAKITI_URL => 'https://pakiti.egi.eu/api/tags_sites.php?type=csv';
+use constant PAKITI_URL => 'https://pakiti3.egi.eu/api/hosts.php';
 
 # Create Nagios::Plugin instance
 my $plugin = Nagios::Plugin->new (usage => USAGE,
@@ -156,7 +157,7 @@ if ($plugin->opts->verbose) {
 $ENV{HTTPS_KEY_FILE} = $plugin->opts->key;
 $ENV{HTTPS_CERT_FILE} = $plugin->opts->cert;
 $ENV{HTTPS_CA_DIR} = '/etc/grid-security/certificates';
-my $url = $plugin->opts->url . '&site=' . $plugin->opts->site;
+my $url = $plugin->opts->url . '?hostGroup=' . $plugin->opts->site
 
 if ($plugin->opts->verbose) {
     print "Fetching data from Pakiti URL: $url\n";
