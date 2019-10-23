@@ -157,7 +157,7 @@ if ($plugin->opts->verbose) {
 $ENV{HTTPS_KEY_FILE} = $plugin->opts->key;
 $ENV{HTTPS_CERT_FILE} = $plugin->opts->cert;
 $ENV{HTTPS_CA_DIR} = '/etc/grid-security/certificates';
-my $url = $plugin->opts->url . '?hostGroup=' . $plugin->opts->site
+my $url = $plugin->opts->url . '?activity=2d&hostGroup=' . $plugin->opts->site
 
 if ($plugin->opts->verbose) {
     print "Fetching data from Pakiti URL: $url\n";
