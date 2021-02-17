@@ -1,3 +1,6 @@
+* Sun Feb 14 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.0.0-9
+- check_CVE-2021-3156: Check if mitigation for CVE-2021-3156 has been applied
+
 * Wed Oct 24 2019 Daniel Kouril <kouril@ics.muni.cz> - 2.0.0-8
 - check_pakiti_vuln: Only ask for recent machines from Pakiti [ggus #143718]
 
