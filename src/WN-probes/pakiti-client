@@ -380,7 +380,7 @@ for SERVER in $SERVERS; do
 		FILE_SIZE=`cat ${TMPFILE} | wc -c`
 		let POST_DATA_SIZE=${POST_DATA_SIZE}+${FILE_SIZE}-1
 	
-		POST_HTTP_HEADER="POST ${URL_PATH} HTTP/1.0\nContent-Type: application/x-www-form-urlencoded\nContent-Length: ${POST_DATA_SIZE}\n\n"
+		POST_HTTP_HEADER="POST ${URL_PATH} HTTP/1.0\r\nHost: ${SERVER%%:*}\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: ${POST_DATA_SIZE}\r\n\r\n"
 		 
 		POST_DATA="${POST_HTTP_HEADER}${POST_DATA}"
 		
