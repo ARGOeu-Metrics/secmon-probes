@@ -1,3 +1,7 @@
+* Mon Feb 22 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.0.0-10
+- pakiti-client: Fix Pakiti reporting using openssl and review processing results from Pakiti
+- check_CVE-2018-1111: Check Pakiti results before checking for mitigations
+
 * Sun Feb 14 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.0.0-9
 - check_CVE-2021-3156: Check if mitigation for CVE-2021-3156 has been applied
 
