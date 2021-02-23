@@ -11,7 +11,8 @@ TAG="Nagios"
 CA_PATH=`dirname $0`"/pakiti_cas"
 HOST_CERT=""
 HOST_KEY=""
-REPORT=0
+REPORT=1
+REPORT_FILE="pakiti_results"
 SERVER_REPORT_STATS=1
 IS_PROXY=0
 INTERFACE=""
@@ -169,6 +170,8 @@ fi
   
   if [ ! -z "${L_INTERFACE}" ];	then INTERFACE=${L_INTERFACE}; fi
   if [ ! -z "${A_INTERFACE}" ];	then INTERFACE=${A_INTERFACE}; fi
+
+rm -f $REPORT_FILE
 
 # If method is autodetect, then detect which transport is available
 if [ "X${METHOD}" = "Xautodetect" ]; then
@@ -477,15 +480,17 @@ for SERVER in $SERVERS; do
 	if [ -s "${TMPOUT}" ]; then
 	  if [ "X${METHOD}" = "Xopenssl" ]; then
 	    # Skip HTTP response header, it is separeted from the body by the new line
-	    RESULT=`cat ${TMPOUT} | grep -v $'[\x0d]'`
+	    RESPONSE=`cat ${TMPOUT} | grep -v $'[\x0d]'`
 	  else
-	    RESULT=`cat ${TMPOUT}`
+	    RESPONSE=`cat ${TMPOUT}`
 	  fi
 	fi
 
+	RESULT=$(head -n 1 <<< $RESPONSE)
+
 	if [ "${RESULT}" != "OK" ]; then
 	  echo "ERROR: Pakiti server '$SERVER' returns error:"
-	  echo ${RESULT}
+	  echo ${RESPONSE}
 	  # Continue with next server
 	  continue
 	fi
@@ -499,7 +504,7 @@ for SERVER in $SERVERS; do
 
 	# Print out the results
 	if [ ${REPORT} -eq 1 ]; then
-	  echo ${RESULT}
+		tail -n +2 <<< $RESPONSE >> $REPORT_FILE
 	fi
 done
 
