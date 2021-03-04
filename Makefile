@@ -5,6 +5,7 @@ PROBES=src/probes
 WNPROBES=src/WN-probes
 ARC=src/ARC/50-secmon.ini
 CREAM=src/CREAM
+HTCONDOR=src/HTCondor
 FILES=CHANGES
 
 NOOP    = true
@@ -24,6 +25,7 @@ dist: $(SPECFILE) $(PROBES) $(WNPROBES) $(ARC) $(CREAM) $(FILES)
 	cp -rpf $(WNPROBES) $(distdir)/usr/libexec/grid-monitoring/probes/$(SITE)
 	cp -rpf $(ARC) $(distdir)/etc/arc/nagios
 	cp -rpf $(CREAM) $(distdir)/usr/libexec/grid-monitoring/probes/$(SITE)
+	cp -rpf $(HTCONDOR) $(distdir)/usr/libexec/grid-monitoring/probes/$(SITE)
 	cp -f $(FILES) $(distdir)
 	find $(distdir) -path '*svn*' -prune -exec rm -rf {} \;
 	find $(distdir) -path '.*swp' -prune -exec rm -rf {} \;
