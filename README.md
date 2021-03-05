@@ -34,10 +34,15 @@ For the ARC CE job submission we use the [NorduGrid ARC Nagios Plugins](http://g
 
 For the CREAM CE job submission we use a script heavily based on the [Italiangrid CREAM-CE direct job submission metrics](https://wiki.italiangrid.it/twiki/bin/view/CREAM/DjsCreamProbeNew). Our version of `cream_jobSubmit.py` is modified so it submits a job payload containing all the security passive checks, it retrieves the output and posts the results to Nagios.
 
+## HTCondor-CE tests
+
+We use the [jess grid job submission library](https://gitlab.cern.ch/etf/jess/) to submit a test job and retrieve the results. The etf_run.sh script, that is submitted with the job payload, executes the passive checks and stores their results in JSON files. The jess library retrieves the job output, reads the JSON files and posts the results to Nagios.
+
 ## Directory structure
 
 * `src/arc`: ARC Nagios Plugins configuration file
 * `src/CREAM`: CREAM direct job submissions files
+* `src/HTCondor`: HTCondor-CE payload executable script and probe list
 * `src/WN-probes`: Passive checks
 * `src/probe-src`: Source code of RDSModuleCheck
 * `src/probes` : Active checks

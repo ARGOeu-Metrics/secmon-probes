@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# experimental HTCondor security monitoring job
+# HTCondor-CE security monitoring job
+# 
+# Kyriakos Gkinis <kyrginis at admin grnet gr>
+#
 
 # decompress HTCondor probe payload
 tar zxf gridjob.tgz
@@ -33,8 +36,6 @@ for probe in `cat probe_list`; do
        ;;
    esac
 
-   
-   #sed -i -e '1s/$/|/g' -e ':a;N;$!ba;s/\n/\\n/g' ${probe}.out
    sed -i 's/"/\\"/g' ${probe}.out
 
    summary=$(head -1 ${probe}.out)
