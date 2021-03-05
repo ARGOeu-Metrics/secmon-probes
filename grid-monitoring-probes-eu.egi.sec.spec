@@ -122,7 +122,7 @@ cd -
 
 %changelog
 * Wed Mar 3 2021 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.0-0
-- bla
+- Added support for HTCondor-CE, using the jess grid job submission library.
 
 * Tue Mar 2 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.0.0-12
 - check_CVE-2018-1111: Check properly Pakiti results.
