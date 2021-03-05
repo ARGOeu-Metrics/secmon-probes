@@ -5,8 +5,8 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 2.0.0
-Release: 12%{?dist}
+Version: 2.1.0
+Release: 0%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -15,6 +15,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Requires: emi-cream-nagios
 Requires: nordugrid-arc-client
 Requires: perl-Text-CSV
+Requires: python-jess
 AutoReqProv: no
 BuildArch: noarch
 
@@ -24,6 +25,7 @@ This package includes the framework to submit grid jobs to monitor the security 
 Currently it supports the following middlewares:
 - UMD (CREAM)
 - ARC
+- HTCondor-CE
 
 Additionally it contains the following Nagios probes:
 * WN-pakiti
@@ -74,6 +76,10 @@ export DONT_STRIP=1
 install --directory %{buildroot}%{dir}
 install --directory %{buildroot}%{_sysconfdir}/arc/nagios
 install --directory %{buildroot}/var/spool/cream
+install --directory %{buildroot}/var/spool/htcondor
+
+# create this empty dir otherwise check_js is failing
+install --directory %{buildroot}/usr/libexec/grid-monitoring/wnfm
 
 
 # ARC configuration
@@ -91,8 +97,12 @@ cd .%dir/
 tar -zcvf %{buildroot}%{dir}/CREAM/WN-probes.tar.gz WN-probes/
 cd -
 
+# HTCondor configuration
+%{__cp} -rpf .%dir/HTCondor  %{buildroot}%{dir}
+%{__cp} -rpf .%dir/WN-probes %{buildroot}%{dir}/HTCondor
+
 # Install probes for general usage
-%{__cp} -rpf .%dir/probes  %{buildroot}%{dir}/
+%{__cp} -rpf .%dir/probes  %{buildroot}%{dir}
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -104,8 +114,16 @@ cd -
 %dir
 /var/spool/cream
 %attr(755,nagios,nagios) /var/spool/cream
+%dir
+/var/spool/htcondor
+%attr(755,nagios,nagios) /var/spool/htcondor
+%dir
+/usr/libexec/grid-monitoring/wnfm
 
 %changelog
+* Wed Mar 3 2021 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.0-0
+- Added support for HTCondor-CE, using the jess grid job submission library.
+
 * Tue Mar 2 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.0.0-12
 - check_CVE-2018-1111: Check properly Pakiti results.
 
