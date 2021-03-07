@@ -5,13 +5,8 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-<<<<<<< HEAD
 Version: 2.1.0
 Release: 0%{?dist}
-=======
-Version: 2.0.0
-Release: 13%{?dist}
->>>>>>> master
 
 License: ASL 2.0
 Group: Applications/System
