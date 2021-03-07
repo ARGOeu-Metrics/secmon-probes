@@ -5,8 +5,13 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
+<<<<<<< HEAD
 Version: 2.1.0
 Release: 0%{?dist}
+=======
+Version: 2.0.0
+Release: 13%{?dist}
+>>>>>>> master
 
 License: ASL 2.0
 Group: Applications/System
@@ -121,8 +126,11 @@ cd -
 /usr/libexec/grid-monitoring/wnfm
 
 %changelog
-* Wed Mar 3 2021 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.0-0
+* Mon Mar 8 2021 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.0-0
 - Added support for HTCondor-CE, using the jess grid job submission library.
+
+* Sat Mar 6 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.0.0-13
+- pakiti-client: Simplify the processing of Pakiti output.
 
 * Tue Mar 2 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.0.0-12
 - check_CVE-2018-1111: Check properly Pakiti results.
