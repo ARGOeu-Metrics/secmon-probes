@@ -480,17 +480,14 @@ for SERVER in $SERVERS; do
 	if [ -s "${TMPOUT}" ]; then
 	  if [ "X${METHOD}" = "Xopenssl" ]; then
 	    # Skip HTTP response header, it is separeted from the body by the new line
-	    RESPONSE=`cat ${TMPOUT} | grep -v $'[\x0d]'`
-	  else
-	    RESPONSE=`cat ${TMPOUT}`
+	    sed -i '1,/^\r$/d' "${TMPOUT}"
 	  fi
 	fi
 
-	RESULT=$(head -n 1 <<< $RESPONSE)
-
+	RESULT=$(head -n 1 $TMPOUT)
 	if [ "${RESULT}" != "OK" ]; then
 	  echo "ERROR: Pakiti server '$SERVER' returns error:"
-	  echo ${RESPONSE}
+	  cat ${TMPOUT}
 	  # Continue with next server
 	  continue
 	fi
@@ -504,7 +501,7 @@ for SERVER in $SERVERS; do
 
 	# Print out the results
 	if [ ${REPORT} -eq 1 ]; then
-		tail -n +2 <<< $RESPONSE >> $REPORT_FILE
+		tail -n +2 "$TMPOUT" >> $REPORT_FILE
 	fi
 done
 
