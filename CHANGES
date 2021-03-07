@@ -1,3 +1,6 @@
+* Mon Mar 8 2021 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.0-0
+- Added support for HTCondor-CE, using the jess grid job submission library.
+
 * Sat Mar 6 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.0.0-13
 - pakiti-client: Simplify the processing of Pakiti output.
 
