@@ -6,7 +6,7 @@
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
 Version: 2.0.0
-Release: 12%{?dist}
+Release: 13%{?dist}
 
 License: ASL 2.0
 Group: Applications/System
@@ -106,6 +106,9 @@ cd -
 %attr(755,nagios,nagios) /var/spool/cream
 
 %changelog
+* Sat Mar 6 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.0.0-13
+- check_CVE-2018-1111: Simplify the processing of Pakiti output.
+
 * Tue Mar 2 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.0.0-12
 - check_CVE-2018-1111: Check properly Pakiti results.
 
