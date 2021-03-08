@@ -74,8 +74,8 @@ OUTPUT=${OUTPUT}"Using certificates dir : $CERTDIR\n"
 CRT=`ls -1 $CERTDIR/$CRT_FILES 2>/dev/null`
 
 if [ "x$CRT" == "x" ]; then
-	echo "Cannot find certificate files"
-	crl_check=$NAGIOS_ERROR
+	echo "Cannot find certificate files, exiting"
+	exit $NAGIOS_OK
 else
 	for I_CRT_INFO in $CRT ; do
                 
