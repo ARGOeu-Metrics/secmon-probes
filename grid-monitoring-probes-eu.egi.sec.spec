@@ -5,7 +5,7 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 2.1.0
+Version: 2.1.1
 Release: 0%{?dist}
 
 License: ASL 2.0
@@ -121,6 +121,11 @@ cd -
 /usr/libexec/grid-monitoring/wnfm
 
 %changelog
+* Mon Mar 8 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.1.1-0
+- check_CVE-2018-12021: Check singularity is available before it's checked.
+- CRL: Don't check CRLs if there's no certificate on the system.
+- check_CVE-2013-2094,check_CVE-2016-5195,check_CVE-2018-1111,check_CVE-2018-12021,check_CVE-2018-14634,check_CVE-2021-3156,check_EGI-SVG-2016-5195,check_EGI-SVG-2018-14213: Mitigation checks are skipped when the vulnerability isn't present.
+
 * Mon Mar 8 2021 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.0-0
 - Added support for HTCondor-CE, using the jess grid job submission library.
 
