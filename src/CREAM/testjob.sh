@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# setup a basic PATH just in case
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:$PATH
+
 tar -zxf WN-probes.tar.gz
 
 for probe in `cat probe_list`; do
