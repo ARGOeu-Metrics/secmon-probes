@@ -5,6 +5,9 @@
 # Kyriakos Gkinis <kyrginis at admin grnet gr>
 #
 
+# setup a basic PATH just in case
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:$PATH
+
 # decompress HTCondor probe payload
 tar zxf gridjob.tgz
 
