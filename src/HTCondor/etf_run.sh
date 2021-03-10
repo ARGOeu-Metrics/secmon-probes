@@ -5,6 +5,9 @@
 # Kyriakos Gkinis <kyrginis at admin grnet gr>
 #
 
+# setup a basic PATH just in case
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:$PATH
+
 # decompress HTCondor probe payload
 tar zxf gridjob.tgz
 
@@ -13,6 +16,9 @@ source ./etf-env.sh
 
 # get Worker Node hostname
 gatheredAt=`hostname -f`
+
+# SITE_NAME for Pakiti
+export SITE_NAME=$eu_egi_sec_sitename
 
 # CE hostname
 service_uri=$eu_egi_sec_service_uri
@@ -36,6 +42,10 @@ for probe in `cat probe_list`; do
        ;;
    esac
 
+   # escape backslashes - we need 6 in the json - 12 here
+   sed -i 's/\\/\\\\\\\\\\\\/g' ${probe}.out
+
+   # escape doublequotes
    sed -i 's/"/\\"/g' ${probe}.out
 
    summary=$(head -1 ${probe}.out)

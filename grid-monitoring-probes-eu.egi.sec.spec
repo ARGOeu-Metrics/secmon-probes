@@ -5,7 +5,7 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 2.1.1
+Version: 2.1.3
 Release: 0%{?dist}
 
 License: ASL 2.0
@@ -121,6 +121,15 @@ cd -
 /usr/libexec/grid-monitoring/wnfm
 
 %changelog
+* Tue Mar 9 2021 Daniel Kouril <kouril@ics.muni.cz> and Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.3-0
+- check_CVE-2015-3245: Mitigation checks are skipped when the vulnerability isn't present.
+- HTCondor-CE etf_run.sh script:
+  * Set $SITE_NAME environment variable.
+  * Escape backslashes in the output of WN probes.
+
+* Tue Mar 9 2021 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.2-0
+- Setup a basic $PATH environment variable before executing probes on CREAM and HTCondor-CE.
+
 * Mon Mar 8 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.1.1-0
 - check_CVE-2018-12021: Check singularity is available before it's checked.
 - CRL: Don't check CRLs if there's no certificate on the system.
