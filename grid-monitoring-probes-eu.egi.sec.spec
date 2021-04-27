@@ -123,8 +123,8 @@ cd -
 
 %changelog
 * Mon Apr 26 2021 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.4-0
-- Add python-suds requirement in SPEC file.
-- Argus-ban ssl fix.
+- Added python-suds requirement in SPEC file.
+- Argus-ban ssl context fix.
 - Setup a basic $PATH environment variable for ARC tests.
 
 * Tue Mar 9 2021 Daniel Kouril <kouril@ics.muni.cz> and Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.3-0
