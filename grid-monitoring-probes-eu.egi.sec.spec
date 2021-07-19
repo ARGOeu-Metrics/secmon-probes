@@ -5,7 +5,7 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 2.1.3
+Version: 2.1.5
 Release: 0%{?dist}
 
 License: ASL 2.0
@@ -16,6 +16,7 @@ Requires: emi-cream-nagios
 Requires: nordugrid-arc-client
 Requires: perl-Text-CSV
 Requires: python-jess
+Requires: python-suds
 AutoReqProv: no
 BuildArch: noarch
 
@@ -121,6 +122,14 @@ cd -
 /usr/libexec/grid-monitoring/wnfm
 
 %changelog
+* Fri Jul 16 2021 Jakub Havrila <havrila@cesnet.cz> - 2.1.5-0
+- Added new instance of pakiti server pakiti.metacentrum.cz
+
+* Mon Apr 26 2021 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.4-0
+- Added python-suds requirement in SPEC file.
+- Argus-ban ssl context fix.
+- Setup a basic $PATH environment variable for ARC tests.
+
 * Tue Mar 9 2021 Daniel Kouril <kouril@ics.muni.cz> and Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.3-0
 - check_CVE-2015-3245: Mitigation checks are skipped when the vulnerability isn't present.
 - HTCondor-CE etf_run.sh script:
