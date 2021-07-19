@@ -5,7 +5,7 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 2.1.4
+Version: 2.1.5
 Release: 0%{?dist}
 
 License: ASL 2.0
@@ -122,6 +122,9 @@ cd -
 /usr/libexec/grid-monitoring/wnfm
 
 %changelog
+* Fri Jul 16 2021 Jakub Havrila <havrila@cesnet.cz> - 2.1.5-0
+- Added new instance of pakiti server pakiti.metacentrum.cz
+
 * Mon Apr 26 2021 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.4-0
 - Added python-suds requirement in SPEC file.
 - Argus-ban ssl context fix.

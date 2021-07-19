@@ -1,3 +1,6 @@
+* Fri Jul 16 2021 Jakub Havrila <havrila@cesnet.cz> - 2.1.5-0
+- Added new instance of pakiti server pakiti.metacentrum.cz
+
 * Mon Apr 26 2021 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.4-0
 - Added python-suds requirement in SPEC file.
 - Argus-ban ssl context fix.
