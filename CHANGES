@@ -1,3 +1,6 @@
+* Mon Aug 16 2021 Jakub Havrila <havrila@cesnet.cz> - 2.1.6-0
+- Replaced pakiti server pakiti.metacentrum.cz with pakiti.egi.eu.
+
 * Fri Jul 16 2021 Jakub Havrila <havrila@cesnet.cz> - 2.1.5-0
 - Added new instance of pakiti server pakiti.metacentrum.cz
 
