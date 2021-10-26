@@ -5,7 +5,7 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 2.1.8
+Version: 2.1.9
 Release: 0%{?dist}
 
 License: ASL 2.0
@@ -122,6 +122,9 @@ cd -
 /usr/libexec/grid-monitoring/wnfm
 
 %changelog
+* Tue Oct 26 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.1.9-0
+- Make the Torque probe really exit when qmgr isn't found.
+
 * Mon Oct 25 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.1.8-0
 - Updated pakiti server hostname.
 
