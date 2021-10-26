@@ -6,7 +6,7 @@ NAGIOS_ERROR=2
 NAGIOS_UNKNOWN=3
 
 # Trying to execute qmgr
-type qmgr &>/dev/null || (echo "qmgr is not available. Assuming that other LRMS is used." && exit $NAGIOS_OK)
+type qmgr &>/dev/null || { echo "qmgr is not available. Assuming that other LRMS is used." && exit $NAGIOS_OK; }
 
 QMGR_RESULT=$(qmgr -c "pr se" 2>&1)
 if [ $? != "0" ]
