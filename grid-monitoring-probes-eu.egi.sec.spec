@@ -1,11 +1,11 @@
 %define site eu.egi.sec
-%define dir %{_libexecdir}/grid-monitoring/probes/%{site}
+%define ourdir %{_libexecdir}/grid-monitoring/probes/%{site}
 
 %define debug_package %{nil}
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 2.1.9
+Version: 2.1.10
 Release: 0%{?dist}
 
 License: ASL 2.0
@@ -66,6 +66,8 @@ pattern libkeyutils.so* that doesn't belong to an installed RPM package
 - Check if mitigations for CVE-2018-14634 have been applied
 * WN-check_CVE-2021-3156
 - Check if mitigation for CVE-2021-3156 has been applied
+* WN-check_CVE-2021-3156
+- Check if mitigation for CVE-2021-4034 has been applied
 %prep
 %setup -q
 
@@ -74,7 +76,7 @@ pattern libkeyutils.so* that doesn't belong to an installed RPM package
 %install
 export DONT_STRIP=1
 %{__rm} -rf %{buildroot}
-install --directory %{buildroot}%{dir}
+install --directory %{buildroot}%{ourdir}
 install --directory %{buildroot}%{_sysconfdir}/arc/nagios
 install --directory %{buildroot}/var/spool/cream
 install --directory %{buildroot}/var/spool/htcondor
@@ -85,43 +87,41 @@ install --directory %{buildroot}/usr/libexec/grid-monitoring/wnfm
 
 # ARC configuration
 %{__cp} -rpf .%{_sysconfdir}/arc/nagios/50-secmon.ini %{buildroot}%{_sysconfdir}/arc/nagios
-%{__cp} -rpf .%dir/WN-probes %{buildroot}%{_sysconfdir}/arc/nagios/50-secmon.d
+%{__cp} -rpf .%{ourdir}/WN-probes %{buildroot}%{_sysconfdir}/arc/nagios/50-secmon.d
 %{__rm} -rf %{buildroot}%{_sysconfdir}/arc/nagios/50-secmon.d/pakiti_cas
-cd .%dir/WN-probes
+cd .%{ourdir}/WN-probes
 tar -zcvf %{buildroot}%{_sysconfdir}/arc/nagios/50-secmon.d/pakiti_cas.tar.gz pakiti_cas/
 cd -
 
 # CREAM configuration
-%{__cp} -rpf .%dir/CREAM  %{buildroot}%{dir}
-chmod +x %{buildroot}%{dir}/CREAM/cream_jobSubmit_secmon.py
-cd .%dir/
-tar -zcvf %{buildroot}%{dir}/CREAM/WN-probes.tar.gz WN-probes/
+%{__cp} -rpf .%{ourdir}/CREAM  %{buildroot}%{ourdir}
+chmod +x %{buildroot}%{ourdir}/CREAM/cream_jobSubmit_secmon.py
+cd .%{ourdir}/
+tar -zcvf %{buildroot}%{ourdir}/CREAM/WN-probes.tar.gz WN-probes/
 cd -
 
 # HTCondor configuration
-%{__cp} -rpf .%dir/HTCondor  %{buildroot}%{dir}
-%{__cp} -rpf .%dir/WN-probes %{buildroot}%{dir}/HTCondor
+%{__cp} -rpf .%{ourdir}/HTCondor  %{buildroot}%{ourdir}
+%{__cp} -rpf .%{ourdir}/WN-probes %{buildroot}%{ourdir}/HTCondor
 
 # Install probes for general usage
-%{__cp} -rpf .%dir/probes  %{buildroot}%{dir}
+%{__cp} -rpf .%{ourdir}/probes  %{buildroot}%{ourdir}
 
 %clean
 %{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%dir
+%ourdir
 %{_sysconfdir}/arc/nagios
-%dir
-/var/spool/cream
 %attr(755,nagios,nagios) /var/spool/cream
-%dir
-/var/spool/htcondor
 %attr(755,nagios,nagios) /var/spool/htcondor
-%dir
 /usr/libexec/grid-monitoring/wnfm
 
 %changelog
+* Thu Feb 03 2022 Daniel Kouril <kouril@ics.muni.cz> - 2.1.10-0
+- Added mitigation check for CVE-2021-4034
+
 * Tue Oct 26 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.1.9-0
 - Make the Torque probe really exit when qmgr isn't found.
 
@@ -175,7 +175,7 @@ cd -
 * Sun Feb 14 2021 Daniel Kouril <kouril@ics.muni.cz> - 2.0.0-9
 - check_CVE-2021-3156: Check if mitigation for CVE-2021-3156 has been applied
 
-* Wed Oct 24 2019 Daniel Kouril <kouril@ics.muni.cz> - 2.0.0-8
+* Thu Oct 24 2019 Daniel Kouril <kouril@ics.muni.cz> - 2.0.0-8
 - check_pakiti_vuln: Only ask for recent machines from Pakiti [ggus #143718]
 
 * Wed Oct 09 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-7
@@ -196,7 +196,7 @@ cd -
 - Add requirement for perl-Text-CSV in SPEC file.
 - Create /var/spool/cream.
 
-* Mon Feb 5 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-2
+* Tue Feb 5 2019 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.0.0-2
 - Fix CREAM probes packaging bug in SPEC file.
 - Use Net::SSL in check_pakiti_vuln, otherwise authentication with Pakiti server fails.
 
@@ -314,34 +314,34 @@ cd -
 * Thu Jun 26 2014 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-17
 - Added Pakiti-Check probe
 
-* Tue Sep 25 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-16
+* Wed Sep 25 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-16
 - Fixed Torque probe
 
-* Tue Sep 25 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-15
+* Wed Sep 25 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-15
 - Fixed ARC testjob script to report the probe return code
 
 * Tue Sep 24 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-14
 - Modified the ARC testjob script to return the hostname of the tested node
 
-* Thu Sep 13 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-13
+* Fri Sep 13 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-13
 - check_CVE-2013-2094 version 0.6.
 
-* Thu Aug 30 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-12
+* Fri Aug 30 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-12
 - check_EGI-SVG-2013-5890 version 1.5.
 
-* Thu Aug 30 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-11
+* Fri Aug 30 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-11
 - check_EGI-SVG-2013-5890 version 1.4.
 
-* Thu Aug 30 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-10
+* Fri Aug 30 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-10
 - check_EGI-SVG-2013-5890 version 1.3.
 
-* Thu Aug 30 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-9
+* Fri Aug 30 2013 George Fergadis <fergadis@grid.auth.gr> - 1.0.11-9
 - check_EGI-SVG-2013-5890 version 1.2.
 
-* Thu Aug 30 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-8
+* Fri Aug 30 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-8
 - check_EGI-SVG-2013-5890 version 1.1.
 
-* Thu Aug 30 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-7
+* Fri Aug 30 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-7
 - check_EGI-SVG-2013-5890 version 1.0. Several code improvements.
 
 * Thu Aug 29 2013 Pavlos Daoglou <pdaog@grid.auth.gr> - 1.0.11-6
