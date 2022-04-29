@@ -5,7 +5,7 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 2.1.12
+Version: 2.1.13
 Release: 0%{?dist}
 
 License: ASL 2.0
@@ -119,6 +119,9 @@ cd -
 /usr/libexec/grid-monitoring/wnfm
 
 %changelog
+* Wed Apr 27 2022 Jakub Havrila <havrila@cesnet.cz> - 2.1.13-0
+- Added a check for CVE-2022-25236.
+
 * Mon Apr 25 2022 Jakub Havrila <havrila@cesnet.cz> - 2.1.12-0
 - Added a check for CVE-2022-25235.
 
