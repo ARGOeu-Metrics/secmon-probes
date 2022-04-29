@@ -13,6 +13,7 @@ check_CVE-2018-14634
 check_CVE-2021-3156
 check_CVE-2021-4034
 check_CVE-2022-25235
+check_CVE-2022-25236
 check_EGI-SVG-2016-5195
 check_EGI-SVG-2018-14213
 dcache-perms
