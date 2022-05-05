@@ -9,7 +9,8 @@ BLACKLISTED_PATERNS="^/tmp /lsf /.snapshot"
 function echo_error_or_warning() {
    # If the file/dir is in $PATH, then echo an ERROR.
    # else, echo a WARNING
-   if [ `which $1 2> /dev/null; echo $?` -eq 0 ]; then
+   which $1 >/dev/null 2>&1
+   if [ $? -eq 0 ]; then
       total_errors=$(($total_errors + 1));
       output=${output}"##### 'ERROR': '$1' has write permissions for Others\n"
    else
@@ -18,10 +19,10 @@ function echo_error_or_warning() {
    fi
 
    if [ -d "$1" ]; then
-      ls_out=`ls -lad $1`
+      ls_out=`ls -lad $1 2>/dev/null`
       output=${output}"${ls_out}\n"
    else
-      ls_out=`ls -la $1`
+      ls_out=`ls -la $1 2>/dev/null`
       output=${output}"${ls_out}\n"
    fi
 }
@@ -38,7 +39,7 @@ function check_privileges() {
          break
       fi
    done
-   [ $found_blacklisted -eq 1 ] && continue
+   [ $found_blacklisted -eq 1 ] && return 0
    
    if [ -d "$filename" -o -f "$filename" ]; then             # It's an existing file or directory 
       if ! [ -h "$filename" -o -b "$filename" -o -c "$filename" -o -p "$filename" -o -S "$filename" ]; then
@@ -97,7 +98,7 @@ function check_file_or_dir () {
          done
 
          if [ $dir_checked == "0" ]; then                # It's a new directory.
-            files=`ls -a $directory`
+            files=`ls -a $directory 2>/dev/null`
 
             for f in $files; do                          # Check each file in the directory
                if [ $f != "." ] && [ $f != ".." ]; then  # Skipping '.' and '..' names.
