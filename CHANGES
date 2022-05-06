@@ -1,3 +1,6 @@
+* Wed May 4 2022 Daniel Kouril <kouril@ics.muni.cz> - 2.1.14-0
+- Fixed small code irregularities in permissions probe.
+
 * Wed Apr 27 2022 Jakub Havrila <havrila@cesnet.cz> - 2.1.13-0
 - Added a check for CVE-2022-25236.
 
