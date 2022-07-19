@@ -48,7 +48,7 @@ function check_privileges() {
          tp=`expr substr $fp 10 1`                       # Extract last permission bit: ---------X
          if [ "$tp" != "t" ]; then                       # It's not a tmp directory
             if [ ${filename:0:4} == "/afs" ]; then       # It's a file/dir in AFS
-               # Use 'fs listacl' to find writtable permission
+               # Use 'fs listacl' to find writable permission
                acls=`fs listacl $filename`
                OIFS=${IFS}
                IFS=$'\n'
@@ -132,12 +132,12 @@ function echo_array () {
 function print_summary_metric_results () {
 
    if [ $total_errors -gt 0 ]; then
-      echo "ERROR: Found world writtable files or/and folders in PATH"
+      echo "ERROR: Found world writable files or/and folders in PATH"
    else
       if [ $total_warnings -gt 0 ]; then
-         echo "WARNING: Found world writtable files or/and folders"
+         echo "WARNING: Found world writable files or/and folders"
       else
-         echo "OK: No world writtable files or folders found"
+         echo "OK: No world writable files or folders found"
       fi
    fi
 
@@ -199,4 +199,3 @@ else
 fi
 
 exit $return_code
-

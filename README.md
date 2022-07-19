@@ -1,7 +1,7 @@
 # secmon-probes
 
 The security monitoring probes consist of active and passive checks. The active checks are executed on the Nagios server. The passive checks are executed on the
-Worker Nodes via a grid job that is submitted to each CREAM CE and ARC CE.
+Worker Nodes via a grid job that is submitted to each ARC CE, CREAM CE and HTCondor-CE.
 
 * Active checks:
   * check_pakiti_vuln
