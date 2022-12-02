@@ -1,3 +1,6 @@
+* Thu Dec 01 2022 Jakub Havrila <havrila@cesnet.cz> - 2.1.16-0
+- Added mitigation check for CVE-2022-2588.
+
 * Tue Jul 19 2022 Baptiste Grenier <baptiste@bapt.name> - 2.1.15-0
 - Fixed typos in Permissions probe.
 
