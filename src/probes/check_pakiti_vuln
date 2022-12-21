@@ -21,6 +21,9 @@
 # Changes and Modifications
 # =========================
 # 25-Jun-2014 - Created;
+#
+# 16-Dec-2022 - Kyriakos Gkinis : Added node arch and OS to the plugin output;
+#
 
 use strict;
 use Nagios::Plugin;
@@ -43,7 +46,11 @@ Copyright 2014 Emir Imamagic';
 use constant SHORTNAME => 'Pakiti-Vuln';
 use constant USAGE => "usage: check_pakiti_vuln -H <hostname> \n";
 
+# Pakiti URL with vulnerability results
 use constant PAKITI_URL => 'https://pakiti.egi.eu/api/hosts.php';
+
+# Pakiti URL with information for all hosts
+use constant PAKITI_ALL_URL => 'https://pakiti.egi.eu/api/hostsinfo.php';
 
 # Create Nagios::Plugin instance
 my $plugin = Nagios::Plugin->new (usage => USAGE,
@@ -57,13 +64,19 @@ my $plugin = Nagios::Plugin->new (usage => USAGE,
 # Define additional arguments
 $plugin->add_arg(
     spec => 'url|u=s',
-    help => "u|url\n   Address of Pakiti page with vulnerability results.\n   (default: ".PAKITI_URL.")",
+    help => "u|url\n   Address of Pakiti page with vulnerability results.\n   (default: ".PAKITI_URL.")\n",
     required => 0,
     default => PAKITI_URL
 );
 $plugin->add_arg(
+    spec => 'infourl|i=s',
+    help => "i|infourl\n   Address of Pakiti page with information for all hosts.\n   (default: ".PAKITI_ALL_URL.")\n",
+    required => 0,
+    default => PAKITI_ALL_URL
+);
+$plugin->add_arg(
     spec => 'hostname|H=s',
-    help => "H|hostname\n   Hostname of CE host.\n   (default:)",
+    help => "H|hostname\n   Hostname of CE host.\n   (default:)\n",
     required => 1,
 );
 $plugin->add_arg(
@@ -156,6 +169,7 @@ if ($plugin->opts->verbose) {
 $ENV{HTTPS_KEY_FILE} = $plugin->opts->key;
 $ENV{HTTPS_CERT_FILE} = $plugin->opts->cert;
 $ENV{HTTPS_CA_DIR} = '/etc/grid-security/certificates';
+
 my $url = $plugin->opts->url . '?activity=2d&hostGroup=' . $plugin->opts->site;
 
 if ($plugin->opts->verbose) {
@@ -175,21 +189,48 @@ open my $fh, '<', \$response or $plugin->nagios_die("$nodename: Failed passing H
 my $vulnPakiti = {};
 my @vulnUnresolved = ();
 my $nodeFound;
+my $nodeOS = "undef";
+my $nodeArch = "undef";
 
+# Get node vulnerabilities, os and arch
 my $csv = Text::CSV->new();
 while (my $row = $csv->getline($fh)) {
     next if ( $row->[0] !~ /EGI-Critical/ );
     if ( $row->[3] =~ /$nodename/ ) {
         $nodeFound = 1;
         $vulnPakiti->{lc($row->[1])} = 1;
+        $nodeOS = $row->[4];
+        $nodeArch = $row->[5];
     }
 }
 
-alarm(0);
-
+# If the node had zero vulnerabilities, connect to hostsinfo page to get os and arch
 if (!$nodeFound) {
-    $plugin->nagios_exit(OK, "$nodename: No vulnerabilities found in Pakiti.");
+    $url = $plugin->opts->infourl . '?activity=2d&hostGroup=' . $plugin->opts->site;
+
+    if ($plugin->opts->verbose) {
+        print "Fetching data from Pakiti URL: $url\n";
+    }
+
+    $req = HTTP::Request->new(GET => $url);
+    $res = $ua->request($req);
+    if (!$res->is_success) {
+        $plugin->nagios_die("$nodename: Could not get content of Pakiti web page '$url': ".$res->status_line);
+    }
+
+    $response = $res->content;
+    open $fh, '<', \$response or $plugin->nagios_die("$nodename: Failed passing HTTP response to file handle: $!");
+
+    while (my $row = $csv->getline($fh)) {
+        if ( $row->[0] =~ /$nodename/ ) {
+            $nodeArch = $row->[1];
+            $nodeOS = $row->[2];
+        }
+    }
+    $plugin->nagios_exit(OK, "$nodename, $nodeArch, $nodeOS: No vulnerabilities found in Pakiti.");
 }
+
+alarm(0);
 
 if ($plugin->opts->verbose) {
     print "Pakiti contains the following vulnerabilities for node $nodename:\n";
@@ -204,7 +245,7 @@ foreach my $vuln (sort keys %{$vulnPakiti}) {
 }
 
 if (@vulnUnresolved) {
-    $plugin->nagios_exit(CRITICAL, "$nodename: Found following unresolved vulnerabilities in Pakiti: ".join(', ',@vulnUnresolved));
+    $plugin->nagios_exit(CRITICAL, "$nodename, $nodeArch, $nodeOS: Found following unresolved vulnerabilities in Pakiti: ".join(', ',@vulnUnresolved));
 }
-$plugin->nagios_exit(OK, "$nodename: Critical vulnerabilities found but mitigated by configuration.");
+$plugin->nagios_exit(OK, "$nodename, $nodeArch, $nodeOS: Critical vulnerabilities found but mitigated by configuration.");
 
