@@ -158,8 +158,11 @@ if (!$nodename) {
     $plugin->nagios_die("$nodename: Could not extract node name from Nagios test eu.egi.sec.WN-Pakiti-$vo output: $pakiti_output");
 }
 
+# extract short hostname
+my $short_nodename = (split /\./, $nodename)[0];
+
 if ($plugin->opts->verbose) {
-    print "Looking for vulnerabilities in Pakiti for node: $nodename\n";
+    print "Looking for vulnerabilities in Pakiti for node: $short_nodename\n";
     print "CE has the following Nagios vuln tests:\n";
     foreach my $vuln (sort keys %{$vulnNagios}) {
         print "- $vuln: ".$vulnNagios->{$vuln}."\n";
@@ -196,7 +199,7 @@ my $nodeArch = "undef";
 my $csv = Text::CSV->new();
 while (my $row = $csv->getline($fh)) {
     next if ( $row->[0] !~ /EGI-Critical/ );
-    if ( $row->[3] =~ /$nodename/ ) {
+    if ( $row->[3] =~ /$short_nodename/ ) {
         $nodeFound = 1;
         $vulnPakiti->{lc($row->[1])} = 1;
         $nodeOS = $row->[4];
@@ -222,7 +225,7 @@ if (!$nodeFound) {
     open $fh, '<', \$response or $plugin->nagios_die("$nodename: Failed passing HTTP response to file handle: $!");
 
     while (my $row = $csv->getline($fh)) {
-        if ( $row->[0] =~ /$nodename/ ) {
+        if ( $row->[0] =~ /$short_nodename/ ) {
             $nodeArch = $row->[1];
             $nodeOS = $row->[2];
         }
