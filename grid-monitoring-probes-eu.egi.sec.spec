@@ -5,7 +5,7 @@
 
 Summary: Security monitoring probes based on EGI CSIRT requirements
 Name: grid-monitoring-probes-eu.egi.sec
-Version: 2.1.17
+Version: 2.1.18
 Release: 0%{?dist}
 
 License: ASL 2.0
@@ -121,6 +121,9 @@ cd -
 /usr/libexec/grid-monitoring/wnfm
 
 %changelog
+* Wed Jan 04 2023 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.18-0
+- check_pakiti_vuln: search for short hostnames in info from pakiti server.
+
 * Wed Dec 21 2022 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.17-0
 - Added node architecture and OS to the output of check_pakiti_vuln probe.
 
