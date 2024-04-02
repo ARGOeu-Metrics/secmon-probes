@@ -1,3 +1,6 @@
+* Tue Apr 02 2024 Jakub Havrila <havrila@cesnet.cz> - 2.1.22-0
+- Added a check for CVE-2019-12528.
+
 * Wed Feb 14 2024 Jakub Havrila <havrila@cesnet.cz> - 2.1.21-0
 - Added fix for permissions probe for functions in env.
 
