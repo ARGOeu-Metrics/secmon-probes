@@ -146,7 +146,7 @@ function print_summary_metric_results () {
 }
 
 start_time=`date -u +%s`
-envs=`env | grep = | cut -d= -f1`
+envs=`env | grep -v "^\s" | grep -v "{" | grep -v "}" | grep -v "()" | grep = | cut -d= -f1`
 total_errors=0
 total_warnings=0
 declare -a checked_dirs  # Array containing all checked directories
