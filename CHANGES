@@ -1,3 +1,6 @@
+* Wed Jul 15 2026 Jakub Havrila <havrila@cesnet.cz> - 2.1.30-0
+- Added mitigation checks for CVE-2026-43503, CVE-2026-46331 and CVE-2026-53359.
+
 * Mon May 18 2026 Kyriakos Gkinis <kyrginis@admin.grnet.gr> - 2.1.29-1
 - Fixed execution of Python script check_CVE-2026-31431 in the ARC configuration.
 
