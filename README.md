@@ -35,7 +35,10 @@ Worker Nodes via a grid job that is submitted to each ARC CE, CREAM CE and HTCon
   * check_CVE-2025-38352
   * check_CVE-2026-31431
   * check_CVE-2026-43284
+  * check_CVE-2026-43503
   * check_CVE-2026-46300
+  * check_CVE-2026-46331
+  * check_CVE-2026-53359
   * dcache-perms
   * libkeyutils
 
